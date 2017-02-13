@@ -149,9 +149,6 @@ class CustomServiceOrchestrator():
     # /etc/<service_name>/conf
 
     conf_dir = os.path.join(self.credential_conf_dir, service_name.lower())
-    if not os.path.exists(conf_dir):
-      os.makedirs(conf_dir, 0644)
-
     return conf_dir
 
   def getConfigTypeCredentials(self, commandJson):
@@ -241,6 +238,7 @@ class CustomServiceOrchestrator():
                 value_names.append(value_name) # Gather the value_name for deletion
           if len(credentials) > 0:
             configtype_credentials[config_type] = credentials
+            logger.info("Identifying config {0} for CS: ".format(config_type))
           for value_name in value_names:
             # Remove the clear text password
             config.pop(value_name, None)
@@ -258,8 +256,11 @@ class CustomServiceOrchestrator():
     roleCommand = None
     if 'roleCommand' in commandJson:
       roleCommand = commandJson['roleCommand']
+    task_id = None
+    if 'taskId' in commandJson:
+      task_id = commandJson['taskId']
 
-    logger.info('generateJceks: roleCommand={0}'.format(roleCommand))
+    logger.info('Generating the JCEKS file: roleCommand={0} and taskId = {1}'.format(roleCommand, task_id))
 
     # Set up the variables for the external command to generate a JCEKS file
     java_home = commandJson['hostLevelParams']['java_home']
@@ -270,6 +271,12 @@ class CustomServiceOrchestrator():
 
     # Gather the password values and remove them from the configuration
     configtype_credentials = self.getConfigTypeCredentials(commandJson)
+
+    # CS is enabled but no config property is available for this command
+    if len(configtype_credentials) == 0:
+      logger.info("Credential store is enabled but no property are found that can be encrypted.")
+      commandJson['credentialStoreEnabled'] = "false"
+
     for config_type, credentials in configtype_credentials.items():
       config = commandJson['configurations'][config_type]
       file_path = os.path.join(self.getProviderDirectory(serviceName), "{0}.jceks".format(config_type))

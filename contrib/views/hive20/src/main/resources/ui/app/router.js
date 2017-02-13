@@ -28,7 +28,12 @@ Router.map(function() {
   this.route('service-check');
 
   this.route('jobs');
-  this.route('udfs');
+  this.route('udfs', function() {
+    this.route('new');
+    this.route('udf', {path: '/:udfId'}, function() {
+    });
+  });
+
   this.route('settings');
   this.route('savedqueries');
 
@@ -38,7 +43,9 @@ Router.map(function() {
       this.route('tables', {path: '/tables'}, function() {
         this.route('new-database');
         this.route('new');
+        this.route('upload-table');
         this.route('table', {path: '/:name'}, function() {
+          this.route('edit');
           this.route('rename');
           this.route('columns');
           this.route('partitions');
@@ -62,7 +69,6 @@ Router.map(function() {
 
     });
   });
-
 });
 
 export default Router;
