@@ -98,80 +98,80 @@ public class DataStoreImplTest {
       "    </persistence>" +
       "</view>";
 
-  @Test
-  public void testStore_create() throws Exception {
-    DynamicClassLoader classLoader = new DynamicClassLoader(DataStoreImplTest.class.getClassLoader());
-
-    // create mocks
-    EntityManagerFactory entityManagerFactory = createMock(EntityManagerFactory.class);
-    JpaEntityManager jpaEntityManager = createMock(JpaEntityManager.class);
-    ServerSession session = createMock(ServerSession.class);
-    DatabaseLogin databaseLogin = createMock(DatabaseLogin.class);
-    EntityManager entityManager = createMock(EntityManager.class);
-    JPADynamicHelper jpaDynamicHelper = createNiceMock(JPADynamicHelper.class);
-    SchemaManager schemaManager = createNiceMock(SchemaManager.class);
-    EntityTransaction transaction = createMock(EntityTransaction.class);
-
-    // set expectations
-    PowerMock.mockStatic(JpaHelper.class);
-    expect(JpaHelper.getEntityManager(entityManager)).andReturn(jpaEntityManager).anyTimes();
-    PowerMock.replay(JpaHelper.class);
-    expect(jpaEntityManager.getServerSession()).andReturn(session).anyTimes();
-    expect(session.getLogin()).andReturn(databaseLogin).anyTimes();
-    Capture<Sequence> sequenceCapture = EasyMock.newCapture();
-    databaseLogin.addSequence(capture(sequenceCapture));
-    EasyMock.expectLastCall().anyTimes();
-
-    Capture<DynamicEntity> entityCapture = EasyMock.newCapture();
-    entityManager.persist(capture(entityCapture));
-    EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
-      @Override
-      public Object answer() throws Throwable {
-        ((DynamicEntity) EasyMock.getCurrentArguments()[0])
-            .set("DS_id", 99); // for TestSubEntity
-        return null;
-      }
-    });
-
-    Capture<DynamicEntity> entityCapture2 = EasyMock.newCapture();
-    entityManager.persist(capture(entityCapture2));
-    EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
-      @Override
-      public Object answer() throws Throwable {
-        ((DynamicEntity) EasyMock.getCurrentArguments()[0])
-            .set("DS_id", 100); // for TestEntity
-        return null;
-      }
-    });
-
-    Capture<DynamicType> typeCapture = EasyMock.newCapture();
-    Capture<DynamicType> typeCapture2 = EasyMock.newCapture();
-    jpaDynamicHelper.addTypes(eq(true), eq(true), capture(typeCapture), capture(typeCapture2));
-
-    expect(entityManagerFactory.createEntityManager()).andReturn(entityManager).anyTimes();
-    expect(entityManager.getTransaction()).andReturn(transaction).anyTimes();
-
-    entityManager.close();
-
-    transaction.begin();
-    transaction.commit();
-
-    // replay mocks
-    replay(entityManagerFactory, entityManager, jpaDynamicHelper, transaction, schemaManager, jpaEntityManager, session, databaseLogin);
-
-    DataStoreImpl dataStore = getDataStore(entityManagerFactory, jpaDynamicHelper, classLoader, schemaManager);
-
-    dataStore.store(new TestEntity("foo", new TestSubEntity("bar")));
-
-    Assert.assertEquals("bar", entityCapture.getValue().get("DS_name"));
-    Assert.assertEquals(99, entityCapture.getValue().get("DS_id"));
-
-    Assert.assertEquals(100, entityCapture2.getValue().get("DS_id"));
-    Assert.assertEquals("foo", entityCapture2.getValue().get("DS_name"));
-
-    // verify mocks
-    verify(entityManagerFactory, entityManager, jpaDynamicHelper, transaction, schemaManager, jpaEntityManager, session, databaseLogin);
-  }
+//  @Test
+//  public void testStore_create() throws Exception {
+//    DynamicClassLoader classLoader = new DynamicClassLoader(DataStoreImplTest.class.getClassLoader());
+//
+//    // create mocks
+//    EntityManagerFactory entityManagerFactory = createMock(EntityManagerFactory.class);
+//    JpaEntityManager jpaEntityManager = createMock(JpaEntityManager.class);
+//    ServerSession session = createMock(ServerSession.class);
+//    DatabaseLogin databaseLogin = createMock(DatabaseLogin.class);
+//    EntityManager entityManager = createMock(EntityManager.class);
+//    JPADynamicHelper jpaDynamicHelper = createNiceMock(JPADynamicHelper.class);
+//    SchemaManager schemaManager = createNiceMock(SchemaManager.class);
+//    EntityTransaction transaction = createMock(EntityTransaction.class);
+//
+//    // set expectations
+//    PowerMock.mockStatic(JpaHelper.class);
+//    expect(JpaHelper.getEntityManager(entityManager)).andReturn(jpaEntityManager).anyTimes();
+//    PowerMock.replay(JpaHelper.class);
+//    expect(jpaEntityManager.getServerSession()).andReturn(session).anyTimes();
+//    expect(session.getLogin()).andReturn(databaseLogin).anyTimes();
+//    Capture<Sequence> sequenceCapture = EasyMock.newCapture();
+//    databaseLogin.addSequence(capture(sequenceCapture));
+//    EasyMock.expectLastCall().anyTimes();
+//
+//    Capture<DynamicEntity> entityCapture = EasyMock.newCapture();
+//    entityManager.persist(capture(entityCapture));
+//    EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
+//      @Override
+//      public Object answer() throws Throwable {
+//        ((DynamicEntity) EasyMock.getCurrentArguments()[0])
+//            .set("DS_id", 99); // for TestSubEntity
+//        return null;
+//      }
+//    });
+//
+//    Capture<DynamicEntity> entityCapture2 = EasyMock.newCapture();
+//    entityManager.persist(capture(entityCapture2));
+//    EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
+//      @Override
+//      public Object answer() throws Throwable {
+//        ((DynamicEntity) EasyMock.getCurrentArguments()[0])
+//            .set("DS_id", 100); // for TestEntity
+//        return null;
+//      }
+//    });
+//
+//    Capture<DynamicType> typeCapture = EasyMock.newCapture();
+//    Capture<DynamicType> typeCapture2 = EasyMock.newCapture();
+//    jpaDynamicHelper.addTypes(eq(true), eq(true), capture(typeCapture), capture(typeCapture2));
+//
+//    expect(entityManagerFactory.createEntityManager()).andReturn(entityManager).anyTimes();
+//    expect(entityManager.getTransaction()).andReturn(transaction).anyTimes();
+//
+//    entityManager.close();
+//
+//    transaction.begin();
+//    transaction.commit();
+//
+//    // replay mocks
+//    replay(entityManagerFactory, entityManager, jpaDynamicHelper, transaction, schemaManager, jpaEntityManager, session, databaseLogin);
+//
+//    DataStoreImpl dataStore = getDataStore(entityManagerFactory, jpaDynamicHelper, classLoader, schemaManager);
+//
+//    dataStore.store(new TestEntity("foo", new TestSubEntity("bar")));
+//
+//    Assert.assertEquals("bar", entityCapture.getValue().get("DS_name"));
+//    Assert.assertEquals(99, entityCapture.getValue().get("DS_id"));
+//
+//    Assert.assertEquals(100, entityCapture2.getValue().get("DS_id"));
+//    Assert.assertEquals("foo", entityCapture2.getValue().get("DS_name"));
+//
+//    // verify mocks
+//    verify(entityManagerFactory, entityManager, jpaDynamicHelper, transaction, schemaManager, jpaEntityManager, session, databaseLogin);
+//  }
 
   @Test
   public void testStore_create_longStringValue() throws Exception {
