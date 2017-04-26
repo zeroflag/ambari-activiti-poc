@@ -8,6 +8,11 @@ import java.util.Map;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.apache.ambari.groovy.client.AmbariClient;
+import org.apache.ambari.server.AmbariException;
+import org.apache.ambari.server.HostCommandBuilder;
+import org.apache.ambari.server.Role;
+import org.apache.ambari.server.RoleCommand;
+import org.apache.ambari.server.WorkflowApi;
 
 import com.example.ui.Hosts;
 import com.google.gson.Gson;
@@ -50,4 +55,77 @@ public abstract class ServerTask implements JavaDelegate {
   protected String serviceId(DelegateExecution context) {
     return ((String) context.getVariable("nameServiceId"));
   }
+
+  protected WorkflowApi api() {
+    return WorkflowApi.getInstance();
+  }
+
+  public void startService(String serviceName) {
+    try {
+      api().sendCommandToService(serviceName, RoleCommand.START);
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void stopService(String serviceName) {
+    try {
+      api().sendCommandToService(serviceName, RoleCommand.STOP);
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void startComponent(String serviceName, String componentName, String host) {
+    try {
+      api().sendCommandToComponent(serviceName, componentName, host, RoleCommand.START);
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void stopComponent(String serviceName, String componentName, String host) {
+    try {
+      api().sendCommandToComponent(serviceName, componentName, host, RoleCommand.STOP);
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+//  public void installComponent(String serviceName, String componentName, List<String> hosts) {
+//    try {
+//      for (String host : hosts) {
+//        api().sendInstallCommand(serviceName, componentName, host);
+//      }
+//    } catch (AmbariException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
+//
+//  public void deleteComponent(String serviceName, String componentName, List<String> hosts) {
+//    try {
+//      for (String host : hosts) {
+//        api().sendUninstallCommand(serviceName, componentName, host);
+//      }
+//    } catch (AmbariException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
+
+//  public void startAll() {
+//    try {
+//      api().modifyAll("START");
+//    } catch (AmbariException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
+//
+//  public void stopAll() {
+//    try {
+//      api().modifyAll("STOP");
+//    } catch (AmbariException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
 }

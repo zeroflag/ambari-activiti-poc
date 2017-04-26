@@ -33,8 +33,6 @@ AMBARI_HOSTNAME = None
 AMBARI_PORT = 8080
 CLUSTER_NAME = None
 PROTOCOL = "http"
-USERNAME = "admin"
-PASSWORD = "admin"
 DEFAULT_TIMEOUT = 10 # seconds
 START_ON_RELOCATE = False
 
@@ -65,17 +63,16 @@ logger = logging.getLogger()
 
 class PreemptiveBasicAuthHandler(urllib2.BaseHandler):
 
-  def __init__(self):
+  def __init__(self, username, password):
+    self.username = username
+    self.password = password
     password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    password_mgr.add_password(None, getUrl(''), USERNAME, PASSWORD)
+    password_mgr.add_password(None, getUrl(''), username, password)
     self.passwd = password_mgr
     self.add_password = self.passwd.add_password
 
   def http_request(self, req):
-    uri = req.get_full_url()
-    user = USERNAME
-    pw = PASSWORD
-    raw = "%s:%s" % (user, pw)
+    raw = "%s:%s" % (self.username, self.password)
     auth = 'Basic %s' % base64.b64encode(raw).strip()
     req.add_unredirected_header('Authorization', auth)
     return req
@@ -88,7 +85,7 @@ class AmbariResource:
     self.componentName = componentName
     self.isInitialized = False
 
-  def initializeResource(self):
+  def initializeResource(self, handler):
     global CLUSTER_NAME
     if CLUSTER_NAME is None:
       CLUSTER_NAME = self.findClusterName()
@@ -99,7 +96,6 @@ class AmbariResource:
     if self.componentName is None:
       raise Exception('Component name undefined')
 
-    handler = PreemptiveBasicAuthHandler()
     opener = urllib2.build_opener(handler)
     # Install opener for all requests
     urllib2.install_opener(opener)
@@ -445,12 +441,6 @@ def main():
   global PROTOCOL
   PROTOCOL = options.protocol
 
-  global USERNAME
-  USERNAME = options.username
-
-  global PASSWORD
-  PASSWORD = options.password
-
   global START_ON_RELOCATE
   START_ON_RELOCATE = options.start_component
 
@@ -475,7 +465,7 @@ def main():
 
   ambariResource = AmbariResource(serviceName=options.service_name,
                                   componentName=options.component_name)
-  ambariResource.initializeResource()
+  ambariResource.initializeResource(PreemptiveBasicAuthHandler(options.username, options.password))
 
   if action == RELOCATE_ACTION:
     if options.new_hostname is not None:

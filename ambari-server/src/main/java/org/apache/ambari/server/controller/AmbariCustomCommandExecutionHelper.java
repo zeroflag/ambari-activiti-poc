@@ -1331,7 +1331,7 @@ public class AmbariCustomCommandExecutionHelper {
         hostParamsStageJson);
   }
 
-  Map<String, String> createDefaultHostParams(Cluster cluster) throws AmbariException {
+  public Map<String, String> createDefaultHostParams(Cluster cluster) throws AmbariException {
     StackId stackId = cluster.getDesiredStackVersion();
     return createDefaultHostParams(cluster, stackId);
   }
