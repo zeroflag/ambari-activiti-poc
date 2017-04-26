@@ -6,6 +6,6 @@
     public void execute(DelegateExecution context) throws Exception {
       String hostName = hosts(context).newNameNodeHost;
       System.out.println("Install Additional Namenode to " + hostName);
-      installComponentBlocking(hostName, "NAMENODE");
+      api().installComponent(hostName, "NAMENODE");
     }
   }

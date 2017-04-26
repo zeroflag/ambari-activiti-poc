@@ -30,13 +30,12 @@ public class ActivitiController extends BaseService {
   @Path("/process")
   @Produces(MediaType.APPLICATION_JSON)
   public String startProcess() {
-    try {
-//      WorkflowApi.getInstance().sendInstallCommand("HDFS", "ZKFC", "c6401.ambari.apache.org");
+//    try {
+//      WorkflowApi.getInstance().sendCommandToService("ZOOKEEPER", RoleCommand.STOP);
 //      WorkflowApi.getInstance().sendCommandToComponent("HDFS", "ZKFC", "c6401.ambari.apache.org", RoleCommand.INSTALL);
-      WorkflowApi.getInstance().sendCommandToService("ZOOKEEPER", RoleCommand.STOP);
-    } catch (AmbariException e) {
-      e.printStackTrace();
-    }
+//    } catch (AmbariException e) {
+//      e.printStackTrace();
+//    }
 
     return activitiService.startProcess().getId();
   }

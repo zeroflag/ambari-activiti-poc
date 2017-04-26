@@ -2,6 +2,7 @@ package org.apache.ambari.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.ambari.server.actionmanager.ActionManager;
@@ -9,12 +10,15 @@ import org.apache.ambari.server.actionmanager.RequestFactory;
 import org.apache.ambari.server.actionmanager.StageFactory;
 import org.apache.ambari.server.controller.AmbariCustomCommandExecutionHelper;
 import org.apache.ambari.server.controller.AmbariManagementController;
+import org.apache.ambari.server.controller.RequestStatusResponse;
+import org.apache.ambari.server.controller.internal.HostResourceProvider;
+import org.apache.ambari.server.controller.spi.Resource;
+import org.apache.ambari.server.controller.utilities.ClusterControllerHelper;
 import org.apache.ambari.server.orm.dao.RequestDAO;
 import org.apache.ambari.server.orm.entities.RequestEntity;
 import org.apache.ambari.server.stageplanner.RoleGraphFactory;
 import org.apache.ambari.server.state.Cluster;
 import org.apache.ambari.server.state.Clusters;
-import org.apache.ambari.server.state.Host;
 import org.apache.ambari.server.state.ServiceComponent;
 import org.apache.ambari.server.state.ServiceComponentHost;
 
@@ -35,7 +39,7 @@ public class WorkflowApi {
   private AmbariCustomCommandExecutionHelper customCommandExecutionHelper;
   private RequestDAO requestDAO;
 
-  public void sendCommandToComponent(String service, String component, String host, RoleCommand command) throws AmbariException {
+  public void sendCommandToComponent(String service, String component, String host, RoleCommand command) {
     sendHostCommands(
       command + " " + component,
       new HostCommandBuilder()
@@ -48,8 +52,12 @@ public class WorkflowApi {
     );
   }
 
-  public void sendCommandToService(String service, RoleCommand command) throws AmbariException {
-    sendHostCommands(command + " " + service, components(service, command));
+  public void sendCommandToService(String service, RoleCommand command) {
+    try {
+      sendHostCommands(command + " " + service, components(service, command));
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private HostCommand[] components(String service, RoleCommand command) throws AmbariException {
@@ -71,14 +79,18 @@ public class WorkflowApi {
     return hostCommands.toArray(new HostCommand[0]);
   }
 
-  public void sendHostCommands(String requestContext, HostCommand... hostCommands) throws AmbariException {
-    waitForCompletion(new StageContainerBuilder(actionManager, requestFactory, roleGraphFactory, ambariManagementController)
-      .stage(
-        new StageBuilder(stageFactory, customCommandExecutionHelper)
-          .requestContext(requestContext)
-          .cluster(cluster())
-          .hostCommands(hostCommands))
-      .persisted());
+  public void sendHostCommands(String requestContext, HostCommand... hostCommands) {
+    try {
+      waitForCompletion(new StageContainerBuilder(actionManager, requestFactory, roleGraphFactory, ambariManagementController)
+        .stage(
+          new StageBuilder(stageFactory, customCommandExecutionHelper)
+            .requestContext(requestContext)
+            .cluster(cluster())
+            .hostCommands(hostCommands))
+        .persisted());
+    } catch (AmbariException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private Cluster cluster() {
@@ -119,4 +131,13 @@ public class WorkflowApi {
     requestDAO = injector.getInstance(RequestDAO.class);
   }
 
+  public void installComponent(String hostName, String component) {
+    HostResourceProvider hostResourceProvider = (HostResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.Host);
+    try {
+      RequestStatusResponse response = hostResourceProvider.install(cluster().getClusterName(), hostName, Collections.emptyList(), Arrays.asList(component), false);
+      waitForCompletion(response.getRequestId());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }
