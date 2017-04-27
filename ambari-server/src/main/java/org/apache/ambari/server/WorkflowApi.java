@@ -24,6 +24,7 @@ import org.apache.ambari.server.orm.entities.RequestEntity;
 import org.apache.ambari.server.stageplanner.RoleGraphFactory;
 import org.apache.ambari.server.state.Cluster;
 import org.apache.ambari.server.state.Clusters;
+import org.apache.ambari.server.state.Host;
 import org.apache.ambari.server.state.ServiceComponent;
 import org.apache.ambari.server.state.ServiceComponentHost;
 import org.slf4j.Logger;
@@ -149,7 +150,6 @@ public class WorkflowApi {
       hostComponentResourceProvider.createResources(PropertyHelper.getCreateRequest(Collections.singleton(properties), null));
       RequestStatusResponse response = hostComponentResourceProvider.install(cluster().getClusterName(), hostName, Collections.emptyList(), Arrays.asList(component), true);
       waitForCompletion(response.getRequestId());
-      sendCommandToComponent(service, component, hostName, RoleCommand.START);
     } catch (ResourceAlreadyExistsException e) {
       LOG.info("Component {} already exists on host {}", component, hostName);
       return;
@@ -170,5 +170,39 @@ public class WorkflowApi {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public void startAll() {
+    try {
+      sendHostCommands("Start ALL", serverComponents(RoleCommand.START));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void stopAll() {
+    try {
+      sendHostCommands("Stop ALL", serverComponents(RoleCommand.STOP));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private HostCommand[] serverComponents(RoleCommand command) throws AmbariException {
+    List<HostCommand> hostCommands = new ArrayList<>();
+    for (Host host : clusters.getHosts()) {
+      for (ServiceComponentHost service : cluster().getServiceComponentHosts(host.getHostName())) {
+        if (service.isClientComponent()) continue;
+        hostCommands.add(
+          new HostCommandBuilder()
+            .hostName(host.getHostName())
+            .service(service.getServiceName())
+            .role(Role.valueOf(service.getServiceComponentName()))
+            .command(command)
+            .cluster(cluster())
+            .build());
+      }
+    }
+    return hostCommands.toArray(new HostCommand[0]);
   }
 }

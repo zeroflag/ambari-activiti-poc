@@ -6,7 +6,7 @@ import org.apache.ambari.server.RoleCommand;
 public class StartComponents extends ServerTask {
   public void execute(DelegateExecution context) throws Exception {
     System.out.println("Starting components");
-    waitForRequest(client.startService("ZOOKEEPER"));
+    api().sendCommandToService("ZOOKEEPER", RoleCommand.START);
     api().sendCommandToComponent("HDFS", "NAMENODE", hosts(context).currentNameNodeHost, RoleCommand.START);
   }
 }
