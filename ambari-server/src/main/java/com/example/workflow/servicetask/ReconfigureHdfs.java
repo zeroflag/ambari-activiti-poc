@@ -114,6 +114,6 @@ public class ReconfigureHdfs extends ServerTask {
            .replaceAll("__OLDNNHOST__", hosts(context).currentNameNodeHost)
            .replaceAll("__NEWNNHOST__", hosts(context).newNameNodeHost), Map.class)
     );
-    api().installComponent(hosts(context).newNameNodeHost,"HDFS_CLIENT");
+    api().installComponent(hosts(context).newNameNodeHost, "HDFS", "HDFS_CLIENT");
   }
 }

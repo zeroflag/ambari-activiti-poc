@@ -13,10 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.activiti.engine.form.FormProperty;
-import org.apache.ambari.server.AmbariException;
-import org.apache.ambari.server.Role;
-import org.apache.ambari.server.RoleCommand;
-import org.apache.ambari.server.WorkflowApi;
 
 @Path("/activiti/")
 public class ActivitiController extends BaseService {
@@ -30,13 +26,6 @@ public class ActivitiController extends BaseService {
   @Path("/process")
   @Produces(MediaType.APPLICATION_JSON)
   public String startProcess() {
-//    try {
-//      WorkflowApi.getInstance().sendCommandToService("ZOOKEEPER", RoleCommand.STOP);
-//      WorkflowApi.getInstance().sendCommandToComponent("HDFS", "ZKFC", "c6401.ambari.apache.org", RoleCommand.INSTALL);
-//    } catch (AmbariException e) {
-//      e.printStackTrace();
-//    }
-
     return activitiService.startProcess().getId();
   }
 
