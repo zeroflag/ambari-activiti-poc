@@ -18,6 +18,7 @@ import org.apache.ambari.server.controller.internal.HostComponentResourceProvide
 import org.apache.ambari.server.controller.spi.Resource;
 import org.apache.ambari.server.controller.spi.ResourceAlreadyExistsException;
 import org.apache.ambari.server.controller.utilities.ClusterControllerHelper;
+import org.apache.ambari.server.controller.utilities.PredicateBuilder;
 import org.apache.ambari.server.controller.utilities.PropertyHelper;
 import org.apache.ambari.server.orm.dao.RequestDAO;
 import org.apache.ambari.server.orm.entities.RequestEntity;
@@ -158,15 +159,20 @@ public class WorkflowApi {
     }
   }
 
-  public void uninstallComponent(String hostName, String component) {
+  public void uninstallComponent(String service, String component, String hostName) {
+    sendCommandToComponent(service, component, hostName, RoleCommand.STOP);
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
     Map<String, Object> properties = new HashMap<>();
-    properties.put("HostRoles/component_name", component);
-    properties.put("HostRoles/cluster_name", cluster().getClusterName());
-    properties.put("HostRoles/host_name", hostName);
     try {
-      hostComponentResourceProvider.deleteResources(PropertyHelper.getCreateRequest(Collections.singleton(properties), null), null);
-      // TODO block
+      hostComponentResourceProvider.deleteResources(PropertyHelper.getCreateRequest(Collections.singleton(properties), null),
+        new PredicateBuilder()
+        .begin()
+        .property("HostRoles/cluster_name").equals(cluster().getClusterName())
+        .and()
+        .property("HostRoles/host_name").equals(hostName)
+        .and()
+        .property("HostRoles/component_name").equals(component)
+        .end().toPredicate());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
