@@ -6,6 +6,6 @@ public class InstallJournalNodes extends ServerTask {
   public void execute(DelegateExecution context) throws Exception {
     System.out.println("Installing Journal Node");
     for (String each : hosts(context).journalNodeHosts)
-      api().installComponent(each, "HDFS", "JOURNALNODE");
+      api().installComponent(each, "JOURNALNODE");
   }
 }

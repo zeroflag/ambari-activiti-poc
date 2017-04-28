@@ -140,7 +140,7 @@ public class WorkflowApi {
     requestDAO = injector.getInstance(RequestDAO.class);
   }
 
-  public void installComponent(String hostName, String service, String component) {
+  public void installComponent(String hostName, String component) {
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
     Map<String, Object> properties = new HashMap<>();
     properties.put("HostRoles/component_name", component);
@@ -158,7 +158,7 @@ public class WorkflowApi {
     }
   }
 
-  public void uninstallComponent(String hostName, String service, String component) {
+  public void uninstallComponent(String hostName, String component) {
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
     Map<String, Object> properties = new HashMap<>();
     properties.put("HostRoles/component_name", component);

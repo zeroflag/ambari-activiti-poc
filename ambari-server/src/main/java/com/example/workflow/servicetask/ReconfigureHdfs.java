@@ -11,6 +11,10 @@ public class ReconfigureHdfs extends ServerTask {
 
   public void execute(DelegateExecution context) throws Exception {
     System.out.println("Reconfiguring Hdfs");
+
+//    "dfs.client.failover.proxy.provider.lofasz=org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider"
+//    "dfs.ha.automatic-failover.enabled=true"
+
     client.modifyConfiguration(
       "hdfs-site",
        gson.fromJson(("{\n" +
@@ -114,6 +118,8 @@ public class ReconfigureHdfs extends ServerTask {
            .replaceAll("__OLDNNHOST__", hosts(context).currentNameNodeHost)
            .replaceAll("__NEWNNHOST__", hosts(context).newNameNodeHost), Map.class)
     );
-    api().installComponent(hosts(context).newNameNodeHost, "HDFS", "HDFS_CLIENT");
+    // TODO bevarni a config changet
+
+    api().installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT");
   }
 }
