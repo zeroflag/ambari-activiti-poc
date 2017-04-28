@@ -14,6 +14,7 @@ import org.apache.ambari.server.actionmanager.StageFactory;
 import org.apache.ambari.server.controller.AmbariCustomCommandExecutionHelper;
 import org.apache.ambari.server.controller.AmbariManagementController;
 import org.apache.ambari.server.controller.RequestStatusResponse;
+import org.apache.ambari.server.controller.internal.ClusterResourceProvider;
 import org.apache.ambari.server.controller.internal.HostComponentResourceProvider;
 import org.apache.ambari.server.controller.spi.Resource;
 import org.apache.ambari.server.controller.spi.ResourceAlreadyExistsException;
@@ -173,6 +174,19 @@ public class WorkflowApi {
         .and()
         .property("HostRoles/component_name").equals(component)
         .end().toPredicate());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void modifyComponent(Map config) {
+    ClusterResourceProvider configResourceProvider = (ClusterResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.Cluster);
+    try {
+      configResourceProvider.updateResources(PropertyHelper.getCreateRequest(Collections.singleton(config), null),
+        new PredicateBuilder()
+          .begin()
+          .property("Clusters/cluster_name").equals(cluster().getClusterName())
+          .end().toPredicate());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
