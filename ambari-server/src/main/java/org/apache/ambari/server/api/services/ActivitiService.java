@@ -14,6 +14,7 @@ import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.apache.ambari.server.WorkflowApi;
 
 public class ActivitiService {
   private final ProcessEngine processEngine;
@@ -26,6 +27,7 @@ public class ActivitiService {
     this.taskService = processEngine.getTaskService();
     this.formService = processEngine.getFormService();
     this.runtimeService = processEngine.getRuntimeService();
+    WorkflowApi.getInstance().init(runtimeService);
   }
 
   private static ProcessEngine processEngine() {

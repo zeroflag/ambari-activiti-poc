@@ -2,13 +2,16 @@ package com.example.workflow.servicetask;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
-import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 
-public class ReconfigureHdfs extends ServerTask {
+public class ReconfigureHdfs extends AsyncServiceTask {
 
-  public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Reconfiguring Hdfs");
+  public final Random random = new Random();
+
+  public void execute(ActivityExecution context) {
+    System.out.println("Reconfiguring Hdfs activitId:" + context.getId());
     String myserviceid = serviceId(context);
     String newNameNodeHost = hosts(context).newNameNodeHost;
     String oldNameNodeHost = hosts(context).currentNameNodeHost;
@@ -16,7 +19,7 @@ public class ReconfigureHdfs extends ServerTask {
     Map<String, String> hdfsSite = new HashMap<String,String>() {{
       put("Clusters/cluster_name", "cc"); // TODO
       put("Clusters/desired_config/type", "hdfs-site");
-      put("Clusters/desired_config/tag", "version" + System.currentTimeMillis());
+      put("Clusters/desired_config/tag", "version" + random.nextInt());
       put("Clusters/desired_config/properties/dfs.replication", "3");
       put("Clusters/desired_config/properties/dfs.namenode.audit.log.async", "true");
       put("Clusters/desired_config/properties/dfs.nameservices", serviceId(context));
@@ -89,7 +92,7 @@ public class ReconfigureHdfs extends ServerTask {
     Map coreSite = new HashMap<String, String>() {{
       put("Clusters/cluster_name", "cc"); // TODO
       put("Clusters/desired_config/type", "core-site");
-      put("Clusters/desired_config/tag", "version" + System.currentTimeMillis());
+      put("Clusters/desired_config/tag", "version" + random.nextInt());
       put("Clusters/desired_config/properties/fs.defaultFS", "hdfs://" + myserviceid);
       put("Clusters/desired_config/properties/ha.failover-controller.active-standby-elector.zk.op.retries", "120");
       put("Clusters/desired_config/properties/hadoop.security.authentication", "simple");
@@ -114,6 +117,6 @@ public class ReconfigureHdfs extends ServerTask {
     }};
     api().modifyComponent(coreSite);
 
-    api().installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT");
+    api().registerCommand(context.getId(), api().installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT"));
   }
 }

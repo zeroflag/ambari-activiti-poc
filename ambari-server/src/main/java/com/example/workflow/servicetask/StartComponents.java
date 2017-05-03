@@ -1,12 +1,15 @@
 package com.example.workflow.servicetask;
 
-import org.activiti.engine.delegate.DelegateExecution;
+import java.util.Arrays;
+
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.ambari.server.RoleCommand;
 
-public class StartComponents extends ServerTask {
-  public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Starting components");
-    api().sendCommandToService("ZOOKEEPER", RoleCommand.START);
-    api().sendCommandToComponent("HDFS", "NAMENODE", hosts(context).currentNameNodeHost, RoleCommand.START);
+public class StartComponents extends AsyncServiceTask {
+  public void execute(ActivityExecution context) {
+    System.out.println("Starting components activitId:" + context.getId());
+    Long id1 = api().sendCommandToService("ZOOKEEPER", RoleCommand.START);
+    Long id2 = api().sendCommandToComponent("HDFS", "NAMENODE", hosts(context).currentNameNodeHost, RoleCommand.START);
+    api().registerCommand(context.getId(), Arrays.asList(id1, id2));
   }
 }

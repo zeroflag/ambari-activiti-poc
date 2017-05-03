@@ -1,11 +1,11 @@
   package com.example.workflow.servicetask;
 
-  import org.activiti.engine.delegate.DelegateExecution;
+  import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 
-  public class InstallAdditionalNamenode extends ServerTask {
-    public void execute(DelegateExecution context) throws Exception {
+  public class InstallAdditionalNamenode extends AsyncServiceTask {
+    public void execute(ActivityExecution context) {
       String hostName = hosts(context).newNameNodeHost;
-      System.out.println("Install Additional Namenode to " + hostName);
-      api().installComponent(hostName, "NAMENODE");
+      System.out.println("Install Additional Namenode to " + hostName + " activitId:" + context.getId());
+      api().registerCommand(context.getId(), api().installComponent(hostName, "NAMENODE"));
     }
   }

@@ -16,11 +16,7 @@ import org.activiti.engine.form.FormProperty;
 
 @Path("/activiti/")
 public class ActivitiController extends BaseService {
-  private ActivitiService activitiService;
-
-  public ActivitiController() {
-    this.activitiService = new ActivitiService();
-  }
+  private static ActivitiService activitiService = new ActivitiService(); // XXX
 
   @POST
   @Path("/process")

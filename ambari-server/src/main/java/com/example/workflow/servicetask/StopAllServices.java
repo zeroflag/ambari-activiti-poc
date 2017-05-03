@@ -1,10 +1,10 @@
 package com.example.workflow.servicetask;
 
-import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 
-public class StopAllServices extends ServerTask {
-  public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Stopping all services");
-    api().stopAll();
+public class StopAllServices extends AsyncServiceTask {
+  public void execute(ActivityExecution context) {
+    System.out.println("Stopping all services activitId:" + context.getId());
+    api().registerCommand(context.getId(), api().stopAll());
   }
 }

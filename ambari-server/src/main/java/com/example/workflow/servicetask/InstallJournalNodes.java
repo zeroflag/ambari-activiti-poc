@@ -1,11 +1,18 @@
 package com.example.workflow.servicetask;
 
-import org.activiti.engine.delegate.DelegateExecution;
+import java.util.ArrayList;
+import java.util.List;
 
-public class InstallJournalNodes extends ServerTask {
-  public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Installing Journal Node");
-    for (String each : hosts(context).journalNodeHosts)
-      api().installComponent(each, "JOURNALNODE");
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
+
+public class InstallJournalNodes extends AsyncServiceTask {
+  public void execute(ActivityExecution context) {
+    System.out.println("Installing Journal Node activitId:" + context.getId());
+    List<Long> ids = new ArrayList<>();
+    for (String each : hosts(context).journalNodeHosts) {
+      Long id = api().installComponent(each, "JOURNALNODE");
+      ids.add(id);
+    }
+    api().registerCommand(context.getId(), ids);
   }
 }

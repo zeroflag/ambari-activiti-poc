@@ -2,7 +2,7 @@ package com.example.workflow.servicetask;
 
 import org.activiti.engine.delegate.DelegateExecution;
 
-public class DisableSecondaryNamenode extends ServerTask {
+public class DisableSecondaryNamenode extends BlockingServiceTask {
   public void execute(DelegateExecution context) throws Exception {
     System.out.println("Disabling Secondary Namenode");
 //    TODO

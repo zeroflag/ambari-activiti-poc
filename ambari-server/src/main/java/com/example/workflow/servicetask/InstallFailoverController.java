@@ -1,11 +1,14 @@
 package com.example.workflow.servicetask;
 
-import org.activiti.engine.delegate.DelegateExecution;
+import java.util.Arrays;
 
-public class InstallFailoverController extends ServerTask {
-  public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Install failover controller");
-    api().installComponent(hosts(context).currentNameNodeHost, "ZKFC");
-    api().installComponent(hosts(context).newNameNodeHost, "ZKFC");
+import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
+
+public class InstallFailoverController extends AsyncServiceTask {
+  public void execute(ActivityExecution context) {
+    System.out.println("Install failover controller activitId:" + context.getId());
+    Long id1 = api().installComponent(hosts(context).currentNameNodeHost, "ZKFC");
+    Long id2 = api().installComponent(hosts(context).newNameNodeHost, "ZKFC");
+    api().registerCommand(context.getId(), Arrays.asList(id1, id2));
   }
 }
