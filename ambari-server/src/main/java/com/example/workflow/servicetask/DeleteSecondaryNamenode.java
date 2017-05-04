@@ -4,7 +4,7 @@ import org.activiti.engine.delegate.DelegateExecution;
 
 public class DeleteSecondaryNamenode extends BlockingServiceTask {
   public void execute(DelegateExecution context) throws Exception {
-    System.out.println("Deleting Secondary NameNode activitId:" + context.getId() + " from " + hosts(context).currentNameNodeHost˜);
+    System.out.println("Deleting Secondary NameNode activitId:" + context.getId() + " from " + hosts(context).currentNameNodeHost);
     api().uninstallComponent("HDFS", "SECONDARY_NAMENODE", hosts(context).currentNameNodeHost);
   }
 }
