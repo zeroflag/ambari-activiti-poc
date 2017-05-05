@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
+import org.apache.ambari.server.AsyncServiceTask;
 
 public class ReconfigureHdfs extends AsyncServiceTask {
 
@@ -87,7 +88,7 @@ public class ReconfigureHdfs extends AsyncServiceTask {
       put("Clusters/desired_config/properties/dfs.ha.namenodes." + myserviceid, "nn1,nn2");
       put("Clusters/desired_config/properties/dfs.ha.automatic-failover.enabled", "true");
     }};
-    api().modifyComponent(hdfsSite);
+    api.modifyConfig(hdfsSite);
 
     Map coreSite = new HashMap<String, String>() {{
       put("Clusters/cluster_name", "cc"); // TODO
@@ -115,8 +116,8 @@ public class ReconfigureHdfs extends AsyncServiceTask {
       put("Clusters/desired_config/properties/hadoop.proxyuser.root.hosts", oldNameNodeHost);
       put("Clusters/desired_config/properties/io.serializations", "org.apache.hadoop.io.serializer.WritableSerialization");
     }};
-    api().modifyComponent(coreSite);
+    api.modifyConfig(coreSite);
 
-    api().registerCommand(context.getId(), api().installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT"));
+    api.registerCommand(context.getId(), api.installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT"));
   }
 }

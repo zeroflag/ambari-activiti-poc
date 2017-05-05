@@ -10,11 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.activiti.engine.RuntimeService;
 import org.apache.ambari.server.actionmanager.ActionManager;
 import org.apache.ambari.server.actionmanager.RequestFactory;
 import org.apache.ambari.server.actionmanager.StageFactory;
-import org.apache.ambari.server.api.services.PersistKeyValueImpl;
 import org.apache.ambari.server.controller.AmbariCustomCommandExecutionHelper;
 import org.apache.ambari.server.controller.AmbariManagementController;
 import org.apache.ambari.server.controller.RequestStatusResponse;
@@ -41,12 +39,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-@EagerSingleton
-public class WorkflowApi {
-  private static Logger LOG = LoggerFactory.getLogger(WorkflowApi.class);
-  private static WorkflowApi INSTANCE;
-  @Inject
-  private Injector injector; // XXX direct injection of fields doesn't work
+public class AsyncServiceTaskApi implements ServiceTaskApi {
+  private static Logger LOG = LoggerFactory.getLogger(AsyncServiceTaskApi.class);
   private ActionManager actionManager;
   private RequestFactory requestFactory;
   private StageFactory stageFactory;
@@ -55,10 +49,82 @@ public class WorkflowApi {
   private AmbariManagementController ambariManagementController;
   private AmbariCustomCommandExecutionHelper customCommandExecutionHelper;
   private RequestDAO requestDAO;
-  private Map<String,List<Long>> pendingCommands = new ConcurrentHashMap<>();
+  private Map<String,List<Long>> pendingTasks = new ConcurrentHashMap<>();
   private volatile boolean stopped = false;
+  private Injector injector;
 
+  // XXX direct injection of fields doesn't work
+  @Inject
+  public AsyncServiceTaskApi(Injector injector) {
+    this.injector = injector;
+  }
+
+  public void startCheckingTaskCompletion(TaskListener taskListener) {
+    Thread thread = new Thread() {
+      @Override
+      public void run() {
+        while (!stopped) {
+          try {
+            notifyOnTaskCompletion(taskListener);
+            Thread.sleep(200);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+          } catch (Exception e) {
+            LOG.error("Error", e);
+          }
+        }
+      }
+    };
+    thread.start();
+  }
+
+  private void notifyOnTaskCompletion(TaskListener taskListener) {
+    Iterator<Map.Entry<String, List<Long>>> iter = pendingTasks.entrySet().iterator();
+    while (iter.hasNext()) {
+      Map.Entry<String, List<Long>> pendingTask = iter.next();
+      String activityId = pendingTask.getKey();
+      List<Long> requestIds = pendingTask.getValue();
+      for (Iterator<Long> iterator = requestIds.iterator(); iterator.hasNext(); )
+        removeIfCompleted(activityId, iterator);
+      if (requestIds.isEmpty()) {
+        LOG.info("Notifying activity: "+ activityId);
+        iter.remove();                           // XXX HTC:1
+        taskListener.taskCompleted(activityId);  // XXX HTC:2
+      }
+    }
+  }
+
+  private void removeIfCompleted(String activityId, Iterator<Long> iterator) {
+    Long requestId = iterator.next();
+    if (requestId == null) {
+      LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
+      iterator.remove();
+    } else if (isCompleted(requestId)) {
+      LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
+      iterator.remove();
+    }
+  }
+
+  private boolean isCompleted(Long requestId) {
+    RequestEntity requestEntity = requestDAO.findByPks(Arrays.asList(requestId), true).get(0);
+    return requestEntity.getStatus().isCompletedState();
+  }
+
+  private void init() {
+    actionManager = injector.getInstance(ActionManager.class);
+    requestFactory = injector.getInstance(RequestFactory.class);
+    stageFactory = injector.getInstance(StageFactory.class);
+    clusters = injector.getInstance(Clusters.class);
+    roleGraphFactory = injector.getInstance(RoleGraphFactory.class);
+    ambariManagementController = injector.getInstance(AmbariManagementController.class);
+    customCommandExecutionHelper = injector.getInstance(AmbariCustomCommandExecutionHelper.class);
+    requestDAO = injector.getInstance(RequestDAO.class);
+  }
+
+  @Override
   public Long sendCommandToComponent(String service, String component, String host, RoleCommand command) {
+    init();
     return sendHostCommands(
       command + " " + component,
       new HostCommandBuilder()
@@ -71,7 +137,9 @@ public class WorkflowApi {
     );
   }
 
+  @Override
   public Long sendCommandToService(String service, RoleCommand command) {
+    init();
     try {
       return sendHostCommands(command + " " + service, components(service, command));
     } catch (AmbariException e) {
@@ -98,7 +166,9 @@ public class WorkflowApi {
     return hostCommands.toArray(new HostCommand[0]);
   }
 
+  @Override
   public Long sendHostCommands(String requestContext, HostCommand... hostCommands) {
+    init();
     try {
       return new StageContainerBuilder(actionManager, requestFactory, roleGraphFactory, ambariManagementController)
         .stage(
@@ -116,40 +186,9 @@ public class WorkflowApi {
     return clusters.getClusters().values().iterator().next();
   }
 
-  public WorkflowApi() {
-    INSTANCE = this;
-  }
-
-  public static WorkflowApi getInstance() {
-    return INSTANCE;
-  }
-
-  public void init(RuntimeService runtimeService) {
-    actionManager = injector.getInstance(ActionManager.class);
-    requestFactory = injector.getInstance(RequestFactory.class);
-    stageFactory = injector.getInstance(StageFactory.class);
-    clusters = injector.getInstance(Clusters.class);
-    roleGraphFactory = injector.getInstance(RoleGraphFactory.class);
-    ambariManagementController = injector.getInstance(AmbariManagementController.class);
-    customCommandExecutionHelper = injector.getInstance(AmbariCustomCommandExecutionHelper.class);
-    requestDAO = injector.getInstance(RequestDAO.class);
-    LOG.info("STARTING pending task thread");
-    Thread thread = new Thread() {
-      @Override
-      public void run() {
-        while (!stopped) {
-          try {
-            checkPendingCommands(runtimeService);
-          } catch (RuntimeException e) {
-            LOG.error("Error", e);
-          }
-        }
-      }
-    };
-    thread.start();
-  }
-
+  @Override
   public Long installComponent(String hostName, String component) {
+    init();
     setAuthentication();
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
     Map<String, Object> properties = new HashMap<>();
@@ -168,7 +207,9 @@ public class WorkflowApi {
     }
   }
 
+  @Override
   public void uninstallComponent(String service, String component, String hostName) {
+    init();
     setAuthentication();
     sendCommandToComponent(service, component, hostName, RoleCommand.STOP);
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
@@ -188,7 +229,9 @@ public class WorkflowApi {
     }
   }
 
-  public void modifyComponent(Map config) {
+  @Override
+  public void modifyConfig(Map config) {
+    init();
     setAuthentication();
     ClusterResourceProvider configResourceProvider = (ClusterResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.Cluster);
     try {
@@ -208,7 +251,9 @@ public class WorkflowApi {
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
-  public Long startAll() {
+  @Override
+  public Long startAllServices() {
+    init();
     try {
       return sendHostCommands("Start ALL", serverComponents(RoleCommand.START));
     } catch (Exception e) {
@@ -216,7 +261,9 @@ public class WorkflowApi {
     }
   }
 
-  public Long stopAll() {
+  @Override
+  public Long stopAllServices() {
+    init();
     try {
       return sendHostCommands("Stop ALL", serverComponents(RoleCommand.STOP));
     } catch (Exception e) {
@@ -242,44 +289,13 @@ public class WorkflowApi {
     return hostCommands.toArray(new HostCommand[0]);
   }
 
-  private void checkPendingCommands(RuntimeService runtimeService) {
-    Iterator<Map.Entry<String, List<Long>>> iter = pendingCommands.entrySet().iterator();
-    while (iter.hasNext()) {
-      Map.Entry<String, List<Long>> entry = iter.next();
-      String activityId = entry.getKey();
-      List<Long> requestIds = entry.getValue();
-      for (Iterator<Long> iterator = requestIds.iterator(); iterator.hasNext(); ) {
-        Long requestId = iterator.next();
-        if (requestId == null) {
-          LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
-          iterator.remove();
-        } else {
-          RequestEntity requestEntity = requestDAO.findByPks(Arrays.asList(requestId), true).get(0);
-          if (requestEntity.getStatus().isCompletedState()) {
-            LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
-            iterator.remove();
-          }
-        }
-      }
-      if (requestIds.isEmpty()) {
-        LOG.info("Notifying activity: "+ activityId);
-        iter.remove();                     // HTC:1
-        runtimeService.signal(activityId); // HTC:2
-      }
-    }
-    try {
-      Thread.sleep(200);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(e);
-    }
-  }
-
+  @Override
   public synchronized void registerCommand(String activitiId, Long requestId) {
-    registerCommand(activitiId, new ArrayList<>(Arrays.asList(requestId)));
+    registerCommand(activitiId, Arrays.asList(requestId));
   }
 
+  @Override
   public synchronized void registerCommand(String activitiId, List<Long> requestIds) {
-    pendingCommands.put(activitiId, new ArrayList<>(requestIds));
+    pendingTasks.put(activitiId, new ArrayList<>(requestIds));
   }
 }

@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
+import org.apache.ambari.server.AsyncServiceTask;
 
 public class InstallJournalNodes extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     System.out.println("Installing Journal Node activitId:" + context.getId());
     List<Long> ids = new ArrayList<>();
     for (String each : hosts(context).journalNodeHosts) {
-      Long id = api().installComponent(each, "JOURNALNODE");
+      Long id = api.installComponent(each, "JOURNALNODE");
       ids.add(id);
     }
-    api().registerCommand(context.getId(), ids);
+    api.registerCommand(context.getId(), ids);
   }
 }

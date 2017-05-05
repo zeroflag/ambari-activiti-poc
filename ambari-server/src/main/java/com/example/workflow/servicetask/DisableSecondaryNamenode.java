@@ -1,6 +1,7 @@
 package com.example.workflow.servicetask;
 
 import org.activiti.engine.delegate.DelegateExecution;
+import org.apache.ambari.server.BlockingServiceTask;
 
 public class DisableSecondaryNamenode extends BlockingServiceTask {
   public void execute(DelegateExecution context) throws Exception {

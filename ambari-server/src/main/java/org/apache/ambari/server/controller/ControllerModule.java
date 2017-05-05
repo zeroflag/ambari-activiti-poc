@@ -47,6 +47,8 @@ import java.util.Set;
 import org.apache.ambari.server.AmbariService;
 import org.apache.ambari.server.EagerSingleton;
 import org.apache.ambari.server.StaticallyInject;
+import org.apache.ambari.server.AsyncServiceTaskApi;
+import org.apache.ambari.server.ServiceTaskApi;
 import org.apache.ambari.server.actionmanager.ActionDBAccessor;
 import org.apache.ambari.server.actionmanager.ActionDBAccessorImpl;
 import org.apache.ambari.server.actionmanager.ExecutionCommandWrapperFactory;
@@ -55,6 +57,8 @@ import org.apache.ambari.server.actionmanager.HostRoleCommandFactoryImpl;
 import org.apache.ambari.server.actionmanager.RequestFactory;
 import org.apache.ambari.server.actionmanager.StageFactory;
 import org.apache.ambari.server.actionmanager.StageFactoryImpl;
+import org.apache.ambari.server.api.services.ActivitiWorkflowEngine;
+import org.apache.ambari.server.api.services.WorkflowEngine;
 import org.apache.ambari.server.checks.AbstractCheckDescriptor;
 import org.apache.ambari.server.checks.DatabaseConsistencyCheckHelper;
 import org.apache.ambari.server.checks.UpgradeCheckRegistry;
@@ -171,10 +175,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.name.Names;
 import com.google.inject.persist.PersistModule;
 import com.google.inject.persist.jpa.AmbariJpaPersistModule;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
@@ -327,6 +337,9 @@ public class ControllerModule extends AbstractModule {
     bind(KerberosHelper.class).to(KerberosHelperImpl.class);
 
     bind(CredentialStoreService.class).to(CredentialStoreServiceImpl.class);
+
+    bind(ServiceTaskApi.class).to(AsyncServiceTaskApi.class).in(Singleton.class);
+    bind(WorkflowEngine.class).to(ActivitiWorkflowEngine.class).in(Singleton.class);
 
     bind(Configuration.class).toInstance(configuration);
     bind(OsFamily.class).toInstance(os_family);

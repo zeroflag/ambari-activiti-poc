@@ -34,8 +34,11 @@ import javax.crypto.BadPaddingException;
 import javax.servlet.DispatcherType;
 
 import org.apache.ambari.server.AmbariException;
+import org.apache.ambari.server.AsyncServiceTaskApi;
+import org.apache.ambari.server.ServiceTaskApi;
 import org.apache.ambari.server.StateRecoveryManager;
 import org.apache.ambari.server.StaticallyInject;
+import org.apache.ambari.server.TaskListener;
 import org.apache.ambari.server.actionmanager.ActionManager;
 import org.apache.ambari.server.actionmanager.HostRoleCommandFactory;
 import org.apache.ambari.server.agent.HeartBeatHandler;
@@ -50,6 +53,7 @@ import org.apache.ambari.server.api.services.BaseService;
 import org.apache.ambari.server.api.services.KeyService;
 import org.apache.ambari.server.api.services.PersistKeyValueImpl;
 import org.apache.ambari.server.api.services.PersistKeyValueService;
+import org.apache.ambari.server.api.services.WorkflowEngine;
 import org.apache.ambari.server.api.services.stackadvisor.StackAdvisorBlueprintProcessor;
 import org.apache.ambari.server.api.services.stackadvisor.StackAdvisorHelper;
 import org.apache.ambari.server.audit.AuditLogger;
@@ -1058,6 +1062,11 @@ public class AmbariServer {
     AmbariServer server = null;
     try {
       LOG.info("Getting the controller");
+
+      // XXX unsafe cast
+      TaskListener workflowEngine = (TaskListener) injector.getInstance(WorkflowEngine.class);
+      AsyncServiceTaskApi serviceTaskApi = (AsyncServiceTaskApi)injector.getInstance(ServiceTaskApi.class);
+      serviceTaskApi.startCheckingTaskCompletion(workflowEngine);
 
       // check if this instance is the active instance
       Configuration config = injector.getInstance(Configuration.class);

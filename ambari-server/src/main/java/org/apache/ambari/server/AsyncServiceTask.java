@@ -1,4 +1,4 @@
-package com.example.workflow.servicetask;
+package org.apache.ambari.server;
 
 import java.util.List;
 import java.util.Map;
@@ -6,13 +6,15 @@ import java.util.Map;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.impl.bpmn.behavior.TaskActivityBehavior;
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
-import org.apache.ambari.server.WorkflowApi;
 
 import com.example.ui.Hosts;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 
+@StaticallyInject
 public abstract class AsyncServiceTask extends TaskActivityBehavior {
   private static final Gson gson = new Gson();
+  protected static @Inject ServiceTaskApi api;
 
   public void signal(ActivityExecution execution, String signalName, Object signalData) throws Exception {
     leave(execution);
@@ -28,6 +30,4 @@ public abstract class AsyncServiceTask extends TaskActivityBehavior {
   protected String serviceId(DelegateExecution context) {
     return ((String) context.getVariable("nameServiceId"));
   }
-
-  protected WorkflowApi api() { return WorkflowApi.getInstance(); }
 }
