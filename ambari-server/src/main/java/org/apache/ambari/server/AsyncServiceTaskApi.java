@@ -150,7 +150,6 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   public void uninstallComponent(String service, String component, String hostName) {
     init();
     setAuthentication();
-    sendCommandToComponent(service, component, hostName, RoleCommand.STOP);
     HostComponentResourceProvider hostComponentResourceProvider = (HostComponentResourceProvider) ClusterControllerHelper.getClusterController().ensureResourceProvider(Resource.Type.HostComponent);
     Map<String, Object> properties = new HashMap<>();
     try {
