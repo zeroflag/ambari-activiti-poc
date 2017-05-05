@@ -16,6 +16,7 @@ import org.apache.ambari.server.controller.AmbariManagementController;
 import org.apache.ambari.server.controller.RequestStatusResponse;
 import org.apache.ambari.server.controller.internal.ClusterResourceProvider;
 import org.apache.ambari.server.controller.internal.HostComponentResourceProvider;
+import org.apache.ambari.server.controller.spi.ClusterController;
 import org.apache.ambari.server.controller.spi.Resource;
 import org.apache.ambari.server.controller.spi.ResourceAlreadyExistsException;
 import org.apache.ambari.server.controller.utilities.ClusterControllerHelper;
@@ -45,6 +46,7 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   private AmbariManagementController ambariManagementController;
   private AmbariCustomCommandExecutionHelper customCommandExecutionHelper;
   private Injector injector;
+  private ClusterController clusterController;
 
   // XXX direct injection of fields doesn't work
   @Inject
@@ -60,6 +62,7 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
     roleGraphFactory = injector.getInstance(RoleGraphFactory.class);
     ambariManagementController = injector.getInstance(AmbariManagementController.class);
     customCommandExecutionHelper = injector.getInstance(AmbariCustomCommandExecutionHelper.class);
+    clusterController = ClusterControllerHelper.getClusterController();
   }
 
   @Override
@@ -192,8 +195,21 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   @Override
   public Long startAllServices() {
     init();
+    Map<String, Object> properties = new HashMap<>();
+    properties.put("ServiceInfo/state", "STARTED");
+    properties.put("ServiceInfo/cluster_name", cluster().getClusterName());
     try {
-      return sendHostCommands("Start ALL", serverComponents(RoleCommand.START));
+      clusterController.updateResources(
+        Resource.Type.Service,
+        PropertyHelper.getCreateRequest(Collections.singleton(properties), null),
+        new PredicateBuilder()
+          .begin()
+          .property("ServiceInfo/cluster_name").equals(cluster().getClusterName())
+          .end()
+          .toPredicate()
+      );
+      return null; // TODO: id
+//      return sendHostCommands("Start ALL", serverComponents(RoleCommand.START)); doesn't work
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
