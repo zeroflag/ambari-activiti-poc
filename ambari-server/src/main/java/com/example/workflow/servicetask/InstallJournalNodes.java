@@ -13,6 +13,6 @@ public class InstallJournalNodes extends AsyncServiceTask {
     List<Long> ids = hosts(context).journalNodeHosts.stream()
       .map(each -> api.installComponent(each, "JOURNALNODE"))
       .collect(toList());
-    pendingTasks.registerCommand(context.getId(), ids);
+    pendingTasks.add(context.getId(), ids);
   }
 }

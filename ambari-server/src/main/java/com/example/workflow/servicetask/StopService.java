@@ -13,6 +13,6 @@ public class StopService extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     LOG.info("Stopping " + serviceName.getExpressionText() + " activitId:" + context.getId());
     Long id = api.sendCommandToService(serviceName.getExpressionText(), RoleCommand.STOP);
-    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getId(), Arrays.asList(id));
   }
 }

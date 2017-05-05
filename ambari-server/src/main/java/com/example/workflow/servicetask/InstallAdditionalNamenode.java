@@ -10,6 +10,6 @@
       String hostName = hosts(context).newNameNodeHost;
       LOG.info("Install Additional Namenode to " + hostName + " activitId:" + context.getId());
       Long id = api.installComponent(hostName, "NAMENODE");
-      pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+      pendingTasks.add(context.getId(), Arrays.asList(id));
     }
   }

@@ -9,6 +9,6 @@ public class StartAllServices extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     LOG.info("Starting All services activitId:" + context.getId());
     Long id = api.startAllServices();
-    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getId(), Arrays.asList(id));
   }
 }

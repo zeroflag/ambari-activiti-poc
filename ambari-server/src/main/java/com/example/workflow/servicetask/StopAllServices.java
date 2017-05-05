@@ -9,6 +9,6 @@ public class StopAllServices extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     LOG.info("Stopping all services activitId:" + context.getId());
     Long id = api.stopAllServices();
-    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getId(), Arrays.asList(id));
   }
 }

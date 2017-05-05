@@ -119,6 +119,6 @@ public class ReconfigureHdfs extends AsyncServiceTask {
     api.modifyConfig(coreSite);
 
     Long id = api.installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT");
-    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getId(), Arrays.asList(id));
   }
 }

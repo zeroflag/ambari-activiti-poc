@@ -10,6 +10,6 @@ public class StartAdditionalNamenode extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     LOG.info("Starting Additional Namenode activitId:" + context.getId());
     Long id = api.sendCommandToComponent("HDFS", "NAMENODE", hosts(context).newNameNodeHost, RoleCommand.START);
-    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getId(), Arrays.asList(id));
   }
 }

@@ -20,7 +20,7 @@ public class PendingTasks {
   private Map<String,List<Long>> pendingTasks = new ConcurrentHashMap<>();
   private volatile boolean stopped = false;
 
-  public synchronized void registerCommand(String activitiId, List<Long> requestIds) {
+  public synchronized void add(String activitiId, List<Long> requestIds) {
     pendingTasks.put(activitiId, new ArrayList<>(requestIds));
   }
 
