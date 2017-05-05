@@ -1,5 +1,7 @@
 package com.example.workflow.servicetask;
 
+import java.util.Arrays;
+
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.ambari.server.AsyncServiceTask;
@@ -10,6 +12,7 @@ public class StopService extends AsyncServiceTask {
 
   public void execute(ActivityExecution context) {
     LOG.info("Stopping " + serviceName.getExpressionText() + " activitId:" + context.getId());
-    api.registerCommand(context.getId(), api.sendCommandToService(serviceName.getExpressionText(), RoleCommand.STOP));
+    Long id = api.sendCommandToService(serviceName.getExpressionText(), RoleCommand.STOP);
+    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
   }
 }

@@ -14,6 +14,6 @@ public class StartJournalNodes extends AsyncServiceTask {
     List<Long> ids = hosts(context).journalNodeHosts.stream()
       .map(each -> api.sendCommandToComponent("HDFS", "JOURNALNODE", each, RoleCommand.START))
       .collect(toList());
-    api.registerCommand(context.getId(), ids);
+    pendingTasks.registerCommand(context.getId(), ids);
   }
 }

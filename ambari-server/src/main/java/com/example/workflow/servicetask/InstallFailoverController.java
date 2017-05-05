@@ -10,6 +10,6 @@ public class InstallFailoverController extends AsyncServiceTask {
     LOG.info("Install failover controller activitId:" + context.getId());
     Long id1 = api.installComponent(hosts(context).currentNameNodeHost, "ZKFC");
     Long id2 = api.installComponent(hosts(context).newNameNodeHost, "ZKFC");
-    api.registerCommand(context.getId(), Arrays.asList(id1, id2));
+    pendingTasks.registerCommand(context.getId(), Arrays.asList(id1, id2));
   }
 }

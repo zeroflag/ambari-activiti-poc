@@ -34,8 +34,7 @@ import javax.crypto.BadPaddingException;
 import javax.servlet.DispatcherType;
 
 import org.apache.ambari.server.AmbariException;
-import org.apache.ambari.server.AsyncServiceTaskApi;
-import org.apache.ambari.server.ServiceTaskApi;
+import org.apache.ambari.server.PendingTasks;
 import org.apache.ambari.server.StateRecoveryManager;
 import org.apache.ambari.server.StaticallyInject;
 import org.apache.ambari.server.TaskListener;
@@ -1063,10 +1062,9 @@ public class AmbariServer {
     try {
       LOG.info("Getting the controller");
 
-      // XXX unsafe cast
-      TaskListener workflowEngine = (TaskListener) injector.getInstance(WorkflowEngine.class);
-      AsyncServiceTaskApi serviceTaskApi = (AsyncServiceTaskApi)injector.getInstance(ServiceTaskApi.class);
-      serviceTaskApi.startCheckingTaskCompletion(workflowEngine);
+      TaskListener workflowEngine = (TaskListener) injector.getInstance(WorkflowEngine.class); // XXX unsafe cast
+      PendingTasks pendingTasks = injector.getInstance(PendingTasks.class);
+      pendingTasks.startCheckingTaskCompletion(workflowEngine);
 
       // check if this instance is the active instance
       Configuration config = injector.getInstance(Configuration.class);

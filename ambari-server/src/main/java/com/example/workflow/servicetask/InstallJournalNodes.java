@@ -3,7 +3,6 @@ package com.example.workflow.servicetask;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.ambari.server.AsyncServiceTask;
@@ -14,6 +13,6 @@ public class InstallJournalNodes extends AsyncServiceTask {
     List<Long> ids = hosts(context).journalNodeHosts.stream()
       .map(each -> api.installComponent(each, "JOURNALNODE"))
       .collect(toList());
-    api.registerCommand(context.getId(), ids);
+    pendingTasks.registerCommand(context.getId(), ids);
   }
 }

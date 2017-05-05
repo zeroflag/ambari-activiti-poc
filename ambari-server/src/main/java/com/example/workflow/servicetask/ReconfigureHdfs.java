@@ -1,5 +1,6 @@
 package com.example.workflow.servicetask;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -117,6 +118,7 @@ public class ReconfigureHdfs extends AsyncServiceTask {
     }};
     api.modifyConfig(coreSite);
 
-    api.registerCommand(context.getId(), api.installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT"));
+    Long id = api.installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT");
+    pendingTasks.registerCommand(context.getId(), Arrays.asList(id));
   }
 }

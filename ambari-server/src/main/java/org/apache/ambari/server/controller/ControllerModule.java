@@ -46,6 +46,7 @@ import java.util.Set;
 
 import org.apache.ambari.server.AmbariService;
 import org.apache.ambari.server.EagerSingleton;
+import org.apache.ambari.server.PendingTasks;
 import org.apache.ambari.server.StaticallyInject;
 import org.apache.ambari.server.AsyncServiceTaskApi;
 import org.apache.ambari.server.ServiceTaskApi;
@@ -338,6 +339,7 @@ public class ControllerModule extends AbstractModule {
 
     bind(CredentialStoreService.class).to(CredentialStoreServiceImpl.class);
 
+    bind(PendingTasks.class).in(Singleton.class);
     bind(ServiceTaskApi.class).to(AsyncServiceTaskApi.class).in(Singleton.class);
     bind(WorkflowEngine.class).to(ActivitiWorkflowEngine.class).in(Singleton.class);
 

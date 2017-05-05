@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ambari.server.actionmanager.ActionManager;
 import org.apache.ambari.server.actionmanager.RequestFactory;
@@ -23,8 +21,6 @@ import org.apache.ambari.server.controller.spi.ResourceAlreadyExistsException;
 import org.apache.ambari.server.controller.utilities.ClusterControllerHelper;
 import org.apache.ambari.server.controller.utilities.PredicateBuilder;
 import org.apache.ambari.server.controller.utilities.PropertyHelper;
-import org.apache.ambari.server.orm.dao.RequestDAO;
-import org.apache.ambari.server.orm.entities.RequestEntity;
 import org.apache.ambari.server.security.authorization.internal.InternalAuthenticationToken;
 import org.apache.ambari.server.stageplanner.RoleGraphFactory;
 import org.apache.ambari.server.state.Cluster;
@@ -48,67 +44,12 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   private RoleGraphFactory roleGraphFactory;
   private AmbariManagementController ambariManagementController;
   private AmbariCustomCommandExecutionHelper customCommandExecutionHelper;
-  private RequestDAO requestDAO;
-  private Map<String,List<Long>> pendingTasks = new ConcurrentHashMap<>();
-  private volatile boolean stopped = false;
   private Injector injector;
 
   // XXX direct injection of fields doesn't work
   @Inject
   public AsyncServiceTaskApi(Injector injector) {
     this.injector = injector;
-  }
-
-  public void startCheckingTaskCompletion(TaskListener taskListener) {
-    Thread thread = new Thread() {
-      @Override
-      public void run() {
-        while (!stopped) {
-          try {
-            notifyOnTaskCompletion(taskListener);
-            Thread.sleep(200);
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-          } catch (Exception e) {
-            LOG.error("Error", e);
-          }
-        }
-      }
-    };
-    thread.start();
-  }
-
-  private void notifyOnTaskCompletion(TaskListener taskListener) {
-    Iterator<Map.Entry<String, List<Long>>> iter = pendingTasks.entrySet().iterator();
-    while (iter.hasNext()) {
-      Map.Entry<String, List<Long>> pendingTask = iter.next();
-      String activityId = pendingTask.getKey();
-      List<Long> requestIds = pendingTask.getValue();
-      for (Iterator<Long> iterator = requestIds.iterator(); iterator.hasNext(); )
-        removeIfCompleted(activityId, iterator);
-      if (requestIds.isEmpty()) {
-        LOG.info("Notifying activity: "+ activityId);
-        iter.remove();                           // XXX HTC:1
-        taskListener.taskCompleted(activityId);  // XXX HTC:2
-      }
-    }
-  }
-
-  private void removeIfCompleted(String activityId, Iterator<Long> iterator) {
-    Long requestId = iterator.next();
-    if (requestId == null) {
-      LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
-      iterator.remove();
-    } else if (isCompleted(requestId)) {
-      LOG.info("Command completed: {} activitiId: {}", requestId, activityId);
-      iterator.remove();
-    }
-  }
-
-  private boolean isCompleted(Long requestId) {
-    RequestEntity requestEntity = requestDAO.findByPks(Arrays.asList(requestId), true).get(0);
-    return requestEntity.getStatus().isCompletedState();
   }
 
   private void init() {
@@ -119,7 +60,6 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
     roleGraphFactory = injector.getInstance(RoleGraphFactory.class);
     ambariManagementController = injector.getInstance(AmbariManagementController.class);
     customCommandExecutionHelper = injector.getInstance(AmbariCustomCommandExecutionHelper.class);
-    requestDAO = injector.getInstance(RequestDAO.class);
   }
 
   @Override
@@ -166,8 +106,7 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
     return hostCommands.toArray(new HostCommand[0]);
   }
 
-  @Override
-  public Long sendHostCommands(String requestContext, HostCommand... hostCommands) {
+  private Long sendHostCommands(String requestContext, HostCommand... hostCommands) {
     init();
     try {
       return new StageContainerBuilder(actionManager, requestFactory, roleGraphFactory, ambariManagementController)
@@ -287,10 +226,5 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
       }
     }
     return hostCommands.toArray(new HostCommand[0]);
-  }
-
-  @Override
-  public synchronized void registerCommand(String activitiId, List<Long> requestIds) {
-    pendingTasks.put(activitiId, new ArrayList<>(requestIds));
   }
 }

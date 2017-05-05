@@ -11,6 +11,6 @@ public class StartComponents extends AsyncServiceTask {
     LOG.info("Starting components activitId:" + context.getId());
     Long id1 = api.sendCommandToService("ZOOKEEPER", RoleCommand.START);
     Long id2 = api.sendCommandToComponent("HDFS", "NAMENODE", hosts(context).currentNameNodeHost, RoleCommand.START);
-    api.registerCommand(context.getId(), Arrays.asList(id1, id2));
+    pendingTasks.registerCommand(context.getId(), Arrays.asList(id1, id2));
   }
 }

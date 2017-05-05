@@ -17,7 +17,8 @@ import com.google.inject.Inject;
 public abstract class AsyncServiceTask extends TaskActivityBehavior {
   public static final Logger LOG = LoggerFactory.getLogger(AsyncServiceTask.class);
   private static final Gson gson = new Gson();
-  protected static @Inject ServiceTaskApi api;
+  protected static @Inject AsyncServiceTaskApi api;
+  protected static @Inject PendingTasks pendingTasks;
 
   public void signal(ActivityExecution execution, String signalName, Object signalData) throws Exception {
     leave(execution);
