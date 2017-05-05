@@ -8,11 +8,10 @@ import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.ambari.server.AsyncServiceTask;
 
 public class ReconfigureHdfs extends AsyncServiceTask {
-
-  public final Random random = new Random();
+  private final static Random random = new Random();
 
   public void execute(ActivityExecution context) {
-    System.out.println("Reconfiguring Hdfs activitId:" + context.getId());
+    LOG.info("Reconfiguring Hdfs activitId:" + context.getId());
     String myserviceid = serviceId(context);
     String newNameNodeHost = hosts(context).newNameNodeHost;
     String oldNameNodeHost = hosts(context).currentNameNodeHost;

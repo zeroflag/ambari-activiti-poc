@@ -5,7 +5,7 @@ import org.apache.ambari.server.AsyncServiceTask;
 
 public class StartAllServices extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
-    System.out.println("Starting All services activitId:" + context.getId());
+    LOG.info("Starting All services activitId:" + context.getId());
     api.registerCommand(context.getId(), api.startAllServices());
   }
 }

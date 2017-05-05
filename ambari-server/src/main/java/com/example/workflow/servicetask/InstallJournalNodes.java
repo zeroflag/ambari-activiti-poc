@@ -1,19 +1,19 @@
 package com.example.workflow.servicetask;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 import org.apache.ambari.server.AsyncServiceTask;
 
 public class InstallJournalNodes extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
-    System.out.println("Installing Journal Node activitId:" + context.getId());
-    List<Long> ids = new ArrayList<>();
-    for (String each : hosts(context).journalNodeHosts) {
-      Long id = api.installComponent(each, "JOURNALNODE");
-      ids.add(id);
-    }
+    LOG.info("Installing Journal Node activitId:" + context.getId());
+    List<Long> ids = hosts(context).journalNodeHosts.stream()
+      .map(each -> api.installComponent(each, "JOURNALNODE"))
+      .collect(toList());
     api.registerCommand(context.getId(), ids);
   }
 }

@@ -9,7 +9,7 @@ public class StopService extends AsyncServiceTask {
   private Expression serviceName;
 
   public void execute(ActivityExecution context) {
-    System.out.println("Stopping " + serviceName.getExpressionText() + " activitId:" + context.getId());
+    LOG.info("Stopping " + serviceName.getExpressionText() + " activitId:" + context.getId());
     api.registerCommand(context.getId(), api.sendCommandToService(serviceName.getExpressionText(), RoleCommand.STOP));
   }
 }

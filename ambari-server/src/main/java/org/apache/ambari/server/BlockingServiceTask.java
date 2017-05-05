@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.example.ui.Hosts;
 import com.google.gson.Gson;
@@ -12,6 +14,7 @@ import com.google.inject.Inject;
 
 @StaticallyInject
 public abstract class BlockingServiceTask implements JavaDelegate {
+  public static final Logger LOG = LoggerFactory.getLogger(BlockingServiceTask.class);
   private static final Gson gson = new Gson();
   protected static @Inject ServiceTaskApi api;
 
