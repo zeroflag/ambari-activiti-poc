@@ -53,11 +53,8 @@
       <serviceTask activiti:class="com.example.workflow.servicetask.StartFailoverController" activiti:exclusive="true" id="startFailoverControllers" name="Start Failover Controllers"/>
       <sequenceFlow id="_4" sourceRef="startAdditionalNamenode" targetRef="installFailoverControllers"/>
       <sequenceFlow id="_5" sourceRef="installFailoverControllers" targetRef="startFailoverControllers"/>
-      <serviceTask activiti:class="com.example.workflow.servicetask.ReconfigureHBase" activiti:exclusive="true" id="reconfigureHbase" name="Reconfigure Hbase"/>
       <serviceTask activiti:class="com.example.workflow.servicetask.DeleteSecondaryNamenode" activiti:exclusive="true" id="deleteSecondaryNamenode" name="Delete Secondary NameNode"/>
       <serviceTask activiti:class="com.example.workflow.servicetask.StartAllServices" activiti:exclusive="true" id="startAllServices" name="Start All Services"/>
-      <sequenceFlow id="_8" sourceRef="startFailoverControllers" targetRef="reconfigureHbase"/>
-      <sequenceFlow id="_20" sourceRef="reconfigureHbase" targetRef="deleteSecondaryNamenode"/>
       <startEvent id="_6" name="Start Finalize"/>
       <sequenceFlow id="_7" sourceRef="_6" targetRef="startAdditionalNamenode"/>
       <serviceTask activiti:class="com.example.workflow.servicetask.StopService" activiti:exclusive="true" id="stopService" name="Stop HDFS">
@@ -67,6 +64,7 @@
       </serviceTask>
       <sequenceFlow id="_35" sourceRef="deleteSecondaryNamenode" targetRef="stopService"/>
       <sequenceFlow id="_36" sourceRef="stopService" targetRef="startAllServices"/>
+      <sequenceFlow id="_14" sourceRef="startFailoverControllers" targetRef="deleteSecondaryNamenode"/>
     </subProcess>
     <sequenceFlow id="_41" sourceRef="finalizeSetup" targetRef="NameNodeHaEnabled"/>
     <userTask activiti:assignee="kermit" activiti:exclusive="true" id="review" name="Review">
@@ -231,16 +229,10 @@
           <omgdc:Bounds height="55.0" width="165.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="reconfigureHbase" id="Shape-reconfigureHbase">
-        <omgdc:Bounds height="55.0" width="155.0" x="1130.0" y="810.0"/>
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="55.0" width="155.0" x="0.0" y="0.0"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="deleteSecondaryNamenode" id="Shape-deleteSecondaryNamenode">
-        <omgdc:Bounds height="55.0" width="85.0" x="995.0" y="810.0"/>
+        <omgdc:Bounds height="55.0" width="160.0" x="1125.0" y="810.0"/>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+          <omgdc:Bounds height="55.0" width="160.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="startAllServices" id="Shape-startAllServices">
@@ -256,98 +248,91 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="stopService" id="Shape-stopService">
-        <omgdc:Bounds height="55.0" width="85.0" x="900.0" y="810.0"/>
+        <omgdc:Bounds height="55.0" width="165.0" x="920.0" y="810.0"/>
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+          <omgdc:Bounds height="55.0" width="165.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="_35" id="BPMNEdge__35" sourceElement="deleteSecondaryNamenode" targetElement="stopService">
-        <omgdi:waypoint x="995.5" y="837.5"/>
-        <omgdi:waypoint x="985.5" y="837.5"/>
+        <omgdi:waypoint x="1125.0" y="837.5"/>
+        <omgdi:waypoint x="1085.0" y="837.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_34" id="BPMNEdge__34" sourceElement="_25" targetElement="initMetadata">
-        <omgdi:waypoint x="446.0" y="870.5"/>
+        <omgdi:waypoint x="446.0" y="870.0"/>
         <omgdi:waypoint x="446.0" y="815.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_36" id="BPMNEdge__36" sourceElement="stopService" targetElement="startAllServices">
-        <omgdi:waypoint x="900.5" y="837.5"/>
-        <omgdi:waypoint x="870.5" y="837.5"/>
+        <omgdi:waypoint x="920.0" y="837.5"/>
+        <omgdi:waypoint x="870.0" y="837.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_42" id="BPMNEdge__42" sourceElement="stopAllServices" targetElement="installAdditionalNamenode">
-        <omgdi:waypoint x="905.5" y="412.5"/>
-        <omgdi:waypoint x="940.5" y="412.5"/>
+        <omgdi:waypoint x="905.0" y="412.5"/>
+        <omgdi:waypoint x="940.0" y="412.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_41" id="BPMNEdge__41" sourceElement="finalizeSetup" targetElement="NameNodeHaEnabled">
-        <omgdi:waypoint x="690.5" y="827.5"/>
-        <omgdi:waypoint x="462.5" y="951.0"/>
+        <omgdi:waypoint x="690.0" y="827.5"/>
+        <omgdi:waypoint x="462.0" y="951.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_3" id="BPMNEdge__3" sourceElement="_2" targetElement="stopAllServices">
-        <omgdi:waypoint x="766.0" y="356.9921855917195"/>
+        <omgdi:waypoint x="766.0" y="357.0"/>
         <omgdi:waypoint x="766.0" y="385.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_4" id="BPMNEdge__4" sourceElement="startAdditionalNamenode" targetElement="installFailoverControllers">
-        <omgdi:waypoint x="870.5" y="752.5"/>
-        <omgdi:waypoint x="920.5" y="752.5"/>
+        <omgdi:waypoint x="870.0" y="752.5"/>
+        <omgdi:waypoint x="920.0" y="752.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_5" id="BPMNEdge__5" sourceElement="installFailoverControllers" targetElement="startFailoverControllers">
-        <omgdi:waypoint x="1085.5" y="752.5"/>
-        <omgdi:waypoint x="1120.5" y="752.5"/>
+        <omgdi:waypoint x="1085.0" y="752.5"/>
+        <omgdi:waypoint x="1120.0" y="752.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_7" id="BPMNEdge__7" sourceElement="_6" targetElement="startAdditionalNamenode">
-        <omgdi:waypoint x="736.0" y="875.0078144082805"/>
+        <omgdi:waypoint x="736.0" y="875.0"/>
         <omgdi:waypoint x="736.0" y="780.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="startFailoverControllers" targetElement="reconfigureHbase">
-        <omgdi:waypoint x="1207.5" y="780.0"/>
-        <omgdi:waypoint x="1207.5" y="810.0"/>
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="createCheckPoint" targetElement="configureComponents">
-        <omgdi:waypoint x="525.5" y="417.5"/>
-        <omgdi:waypoint x="690.5" y="472.5"/>
+        <omgdi:waypoint x="525.0" y="417.5"/>
+        <omgdi:waypoint x="690.0" y="472.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_11" id="BPMNEdge__11" sourceElement="_27" targetElement="getNameServiceId">
-        <omgdi:waypoint x="740.5" y="271.0"/>
-        <omgdi:waypoint x="515.5" y="87.5"/>
+        <omgdi:waypoint x="740.0" y="271.0"/>
+        <omgdi:waypoint x="515.0" y="87.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_10" id="BPMNEdge__10" sourceElement="installAdditionalNamenode" targetElement="installJournalNodes">
-        <omgdi:waypoint x="1090.5" y="412.5"/>
-        <omgdi:waypoint x="1150.5" y="412.5"/>
+        <omgdi:waypoint x="1090.0" y="412.5"/>
+        <omgdi:waypoint x="1150.0" y="412.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
@@ -360,15 +345,22 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_12" id="BPMNEdge__12" sourceElement="EnableNamenodeHa" targetElement="getNameServiceId">
-        <omgdi:waypoint x="212.5" y="146.0"/>
-        <omgdi:waypoint x="325.5" y="87.5"/>
+        <omgdi:waypoint x="212.0" y="146.0"/>
+        <omgdi:waypoint x="325.0" y="87.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_14" id="BPMNEdge__14" sourceElement="startFailoverControllers" targetElement="deleteSecondaryNamenode">
+        <omgdi:waypoint x="1205.0" y="780.0"/>
+        <omgdi:waypoint x="1205.0" y="810.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_17" id="BPMNEdge__17" sourceElement="reconfigureHdfs" targetElement="startJournalNodes">
-        <omgdi:waypoint x="1155.5" y="512.5"/>
-        <omgdi:waypoint x="1090.5" y="512.5"/>
+        <omgdi:waypoint x="1155.0" y="512.5"/>
+        <omgdi:waypoint x="1090.0" y="512.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
@@ -381,8 +373,8 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_19" id="BPMNEdge__19" sourceElement="startJournalNodes" targetElement="disableSecondaryNamenode">
-        <omgdi:waypoint x="945.5" y="512.5"/>
-        <omgdi:waypoint x="905.5" y="512.5"/>
+        <omgdi:waypoint x="945.0" y="512.5"/>
+        <omgdi:waypoint x="905.0" y="512.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
@@ -394,16 +386,9 @@
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_20" id="BPMNEdge__20" sourceElement="reconfigureHbase" targetElement="deleteSecondaryNamenode">
-        <omgdi:waypoint x="1130.5" y="837.5"/>
-        <omgdi:waypoint x="1080.5" y="837.5"/>
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_24" id="BPMNEdge__24" sourceElement="configureComponents" targetElement="initJournalNode">
-        <omgdi:waypoint x="690.5" y="472.5"/>
-        <omgdi:waypoint x="535.5" y="562.5"/>
+        <omgdi:waypoint x="690.0" y="472.5"/>
+        <omgdi:waypoint x="535.0" y="562.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
@@ -416,29 +401,29 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_28" id="BPMNEdge__28" sourceElement="_27" targetElement="createCheckPoint">
-        <omgdi:waypoint x="740.5" y="271.0"/>
-        <omgdi:waypoint x="525.5" y="417.5"/>
+        <omgdi:waypoint x="740.0" y="271.0"/>
+        <omgdi:waypoint x="525.0" y="417.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_31" id="BPMNEdge__31" sourceElement="initMetadata" targetElement="_25">
         <omgdi:waypoint x="446.0" y="815.0"/>
-        <omgdi:waypoint x="446.0" y="870.5"/>
+        <omgdi:waypoint x="446.0" y="870.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_30" id="BPMNEdge__30" sourceElement="review" targetElement="_27">
-        <omgdi:waypoint x="520.5" y="292.5"/>
-        <omgdi:waypoint x="740.5" y="271.0"/>
+        <omgdi:waypoint x="520.0" y="292.5"/>
+        <omgdi:waypoint x="740.0" y="271.0"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_33" id="BPMNEdge__33" sourceElement="_25" targetElement="finalizeSetup">
-        <omgdi:waypoint x="462.5" y="886.0"/>
-        <omgdi:waypoint x="690.5" y="827.5"/>
+        <omgdi:waypoint x="462.0" y="886.0"/>
+        <omgdi:waypoint x="690.0" y="827.5"/>
         <bpmndi:BPMNLabel>
           <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
