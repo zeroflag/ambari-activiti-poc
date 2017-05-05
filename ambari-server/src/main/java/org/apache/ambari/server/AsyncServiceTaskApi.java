@@ -290,11 +290,6 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   }
 
   @Override
-  public synchronized void registerCommand(String activitiId, Long requestId) {
-    registerCommand(activitiId, Arrays.asList(requestId));
-  }
-
-  @Override
   public synchronized void registerCommand(String activitiId, List<Long> requestIds) {
     pendingTasks.put(activitiId, new ArrayList<>(requestIds));
   }

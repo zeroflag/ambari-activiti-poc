@@ -22,7 +22,5 @@ public interface ServiceTaskApi {
 
   Long stopAllServices();
 
-  void registerCommand(String activitiId, Long requestId);
-
   void registerCommand(String activitiId, List<Long> requestIds);
 }
