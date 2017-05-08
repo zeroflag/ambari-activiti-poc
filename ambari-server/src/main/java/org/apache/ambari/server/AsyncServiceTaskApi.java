@@ -46,7 +46,6 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
   private AmbariManagementController ambariManagementController;
   private AmbariCustomCommandExecutionHelper customCommandExecutionHelper;
   private Injector injector;
-  private ClusterController clusterController;
 
   // XXX direct injection of fields doesn't work
   @Inject
@@ -62,7 +61,6 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
     roleGraphFactory = injector.getInstance(RoleGraphFactory.class);
     ambariManagementController = injector.getInstance(AmbariManagementController.class);
     customCommandExecutionHelper = injector.getInstance(AmbariCustomCommandExecutionHelper.class);
-    clusterController = ClusterControllerHelper.getClusterController();
   }
 
   @Override
@@ -199,7 +197,7 @@ public class AsyncServiceTaskApi implements ServiceTaskApi {
     properties.put("ServiceInfo/state", "STARTED");
     properties.put("ServiceInfo/cluster_name", cluster().getClusterName());
     try {
-      clusterController.updateResources(
+      ClusterControllerHelper.getClusterController().updateResources(
         Resource.Type.Service,
         PropertyHelper.getCreateRequest(Collections.singleton(properties), null),
         new PredicateBuilder()
