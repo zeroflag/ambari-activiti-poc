@@ -30,6 +30,7 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
 
   private ProcessEngine processEngine() {
     return new StandaloneProcessEngineConfiguration()
+      .setAsyncExecutorEnabled(true)
       .setJdbcUrl("jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000")
       .setJdbcUsername("sa")
       .setJdbcPassword("")
