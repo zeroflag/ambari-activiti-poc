@@ -38,7 +38,7 @@ public class ActivitiResource extends BaseService {
   @GET
   @Path("/process/ended/{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public boolean taskEnded(@PathParam("id") String processId) {
+  public boolean processEnded(@PathParam("id") String processId) {
     return workflowEngine.processEnded(processId);
   }
 
