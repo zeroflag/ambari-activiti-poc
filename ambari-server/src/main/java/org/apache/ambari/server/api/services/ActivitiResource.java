@@ -45,7 +45,7 @@ public class ActivitiResource extends BaseService {
   @GET
   @Path("/form/{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<UserForm> completeUserTask(@PathParam("id") String taskId) {
+  public List<UserForm> forms(@PathParam("id") String taskId) {
     return workflowEngine.formData(taskId);
   }
 
