@@ -15,6 +15,17 @@ import org.apache.ambari.server.StaticallyInject;
 
 import com.google.inject.Inject;
 
+/**
+ * REST API for managing activiti workflows
+ *
+ * A typical client would look like this:
+ *
+ * process = startProcess()
+ * while not process.ended():
+ *  for each in process.userTasks():
+ *    userInput = handleInput(each.forms)
+ *    each.complete(userInput)
+ */
 @StaticallyInject
 @Path("/activiti/")
 public class ActivitiResource extends BaseService {
@@ -36,13 +47,6 @@ public class ActivitiResource extends BaseService {
   }
 
   @GET
-  @Path("/process/ended/{id}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public boolean processEnded(@PathParam("id") String processId) {
-    return workflowEngine.processEnded(processId);
-  }
-
-  @GET
   @Path("/form/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public List<UserForm> forms(@PathParam("id") String taskId) {
@@ -57,4 +61,10 @@ public class ActivitiResource extends BaseService {
     workflowEngine.completeUserTask(taskId, variables);
   }
 
+  @GET
+  @Path("/process/ended/{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public boolean processEnded(@PathParam("id") String processId) {
+    return workflowEngine.processEnded(processId);
+  }
 }
