@@ -46,6 +46,11 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
     return process.getId();
   }
 
+  @Override
+  public void stopProcess(String processId) {
+    runtimeService.deleteProcessInstance(processId, "stop");
+  }
+
   private void deploy(String fileName) {
     processEngine.getRepositoryService()
       .createDeployment()
