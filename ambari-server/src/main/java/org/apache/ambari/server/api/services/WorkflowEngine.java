@@ -6,9 +6,9 @@ import java.util.Map;
 public interface WorkflowEngine {
   String startProcess();
 
-  void stopProcess(String processId);
+  void stopProcess(String processExecutionId);
 
-  List<UserTask> getTasks(String executionId);
+  List<UserTask> getTasks(String processExecutionId);
 
   boolean processEnded(String processId);
 

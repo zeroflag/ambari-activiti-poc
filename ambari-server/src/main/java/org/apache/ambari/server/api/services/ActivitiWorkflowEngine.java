@@ -50,8 +50,8 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
   }
 
   @Override
-  public void stopProcess(String processId) {
-    runtimeService.deleteProcessInstance(processId, "stop");
+  public void stopProcess(String processExecutionId) {
+    runtimeService.deleteProcessInstance(processExecutionId, "stop");
   }
 
   private void deploy(String fileName) {
@@ -62,8 +62,8 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
   }
 
   @Override
-  public List<UserTask> getTasks(String executionId) {
-    return taskService.createTaskQuery().executionId(executionId).list()
+  public List<UserTask> getTasks(String processExecutionId) {
+    return taskService.createTaskQuery().executionId(processExecutionId).list()
       .stream()
       .map(task -> new UserTask(task.getId(), task.getName()))
       .collect(Collectors.toList());
