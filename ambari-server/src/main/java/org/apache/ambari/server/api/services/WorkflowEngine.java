@@ -3,15 +3,12 @@ package org.apache.ambari.server.api.services;
 import java.util.List;
 import java.util.Map;
 
-import org.activiti.engine.form.FormProperty;
-import org.activiti.engine.task.Task;
-
 public interface WorkflowEngine {
   String startProcess();
 
   void stopProcess(String processId);
 
-  List<UserTask> getTasks();
+  List<UserTask> getTasks(String executionId);
 
   boolean processEnded(String processId);
 

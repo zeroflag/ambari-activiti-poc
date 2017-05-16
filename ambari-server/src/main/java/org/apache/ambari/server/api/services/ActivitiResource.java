@@ -43,15 +43,15 @@ public class ActivitiResource extends BaseService {
   @DELETE
   @Path("/process/{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public void stopProcess(@PathParam("id") String processId) {
-    workflowEngine.stopProcess(processId);
+  public void stopProcess(@PathParam("id") String executionId) {
+    workflowEngine.stopProcess(executionId);
   }
 
   @GET
-  @Path("/tasks")
+  @Path("/tasks/{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<UserTask> userTasks() {
-    return workflowEngine.getTasks();
+  public List<UserTask> userTasks(@PathParam("id") String executionId) {
+    return workflowEngine.getTasks(executionId);
   }
 
   @GET

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.activiti.engine.FormService;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -20,12 +21,14 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
   private final RuntimeService runtimeService;
   private final TaskService taskService;
   private final FormService formService;
+  private final HistoryService historyService;
 
   public ActivitiWorkflowEngine() {
     this.processEngine = processEngine();
     this.taskService = processEngine.getTaskService();
     this.formService = processEngine.getFormService();
     this.runtimeService = processEngine.getRuntimeService();
+    this.historyService = processEngine.getHistoryService();
   }
 
   private ProcessEngine processEngine() {
@@ -59,8 +62,8 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
   }
 
   @Override
-  public List<UserTask> getTasks() {
-    return taskService.createTaskQuery().list()
+  public List<UserTask> getTasks(String executionId) {
+    return taskService.createTaskQuery().executionId(executionId).list()
       .stream()
       .map(task -> new UserTask(task.getId(), task.getName()))
       .collect(Collectors.toList());
