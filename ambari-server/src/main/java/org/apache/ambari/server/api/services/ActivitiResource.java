@@ -11,9 +11,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.ambari.server.StaticallyInject;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 
 /**
@@ -30,6 +33,7 @@ import com.google.inject.Inject;
 @StaticallyInject
 @Path("/activiti/")
 public class ActivitiResource extends BaseService {
+  private static final Gson GSON = new GsonBuilder().serializeNulls().create();
   @Inject
   private static WorkflowEngine workflowEngine;
 
@@ -49,9 +53,11 @@ public class ActivitiResource extends BaseService {
 
   @GET
   @Path("/tasks/{id}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public List<UserTask> userTasks(@PathParam("id") String processExecutionId) {
-    return workflowEngine.getTasks(processExecutionId);
+  public Response userTasks(@PathParam("id") String processExecutionId) {
+    List<UserTask> tasks = workflowEngine.getTasks(processExecutionId);
+    return Response.ok(GSON.toJson(tasks), MediaType.TEXT_PLAIN)
+      .header("Content-Type", "application/json")
+      .build(); // XXX make sure null values are serialized
   }
 
   @GET

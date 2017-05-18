@@ -2,6 +2,7 @@ package org.apache.ambari.server.api.services;
 
 import static org.activiti.engine.ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,8 +66,16 @@ public class ActivitiWorkflowEngine implements WorkflowEngine, TaskListener {
   public List<UserTask> getTasks(String processExecutionId) {
     return taskService.createTaskQuery().executionId(processExecutionId).list()
       .stream()
-      .map(task -> new UserTask(task.getId(), task.getName()))
+      .map(task -> new UserTask(task.getId(), task.getName(), task.getFormKey(), requiredInputs(formData(task.getId()))))
       .collect(Collectors.toList());
+  }
+
+  private Map<String, Object> requiredInputs(List<UserForm> userForms) {
+    Map<String, Object> inputs = new HashMap<>();
+    for (UserForm form : userForms) {
+      inputs.put(form.getId(), null);
+    }
+    return inputs;
   }
 
   @Override
