@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.ambari.server.orm.dao.RequestDAO;
 import org.apache.ambari.server.orm.entities.RequestEntity;
@@ -73,4 +74,7 @@ public class PendingTasks {
     return requestEntity.getStatus().isCompletedState();
   }
 
+  public List<Long> pendingRequestIds() {
+    return pendingTasks.values().stream().flatMap(c -> c.stream()).collect(Collectors.toList());
+  }
 }
