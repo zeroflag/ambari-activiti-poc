@@ -18,11 +18,11 @@ import com.google.inject.Inject;
 public class PendingTasks {
   private static Logger LOG = LoggerFactory.getLogger(PendingTasks.class);
   @Inject private RequestDAO requestDAO;
-  private Map<String,List<Long>> pendingTasks = new ConcurrentHashMap<>();
+  private List<PendingTask> pendingTasks2 = new ArrayList<>();
   private volatile boolean stopped = false;
 
-  public synchronized void add(String activitiId, List<Long> requestIds) {
-    pendingTasks.put(activitiId, new ArrayList<>(requestIds));
+  public synchronized void add(String processExecutionId, String activitiId, List<Long> requestIds) {
+    pendingTasks2.add(new PendingTask(processExecutionId, activitiId, new ArrayList<>(requestIds)));
   }
 
   public void startCheckingTaskCompletion(TaskListener taskListener) {
@@ -43,17 +43,15 @@ public class PendingTasks {
   }
 
   private void notifyOnTaskCompletion(TaskListener taskListener) {
-    Iterator<Map.Entry<String, List<Long>>> iter = pendingTasks.entrySet().iterator();
+    Iterator<PendingTask> iter = pendingTasks2.iterator();
     while (iter.hasNext()) {
-      Map.Entry<String, List<Long>> pendingTask = iter.next();
-      String activityId = pendingTask.getKey();
-      List<Long> requestIds = pendingTask.getValue();
-      for (Iterator<Long> iterator = requestIds.iterator(); iterator.hasNext(); )
-        removeIfCompleted(activityId, iterator);
-      if (requestIds.isEmpty()) {
-        LOG.info("Notifying activity: "+ activityId);
+      PendingTask pendingTask = iter.next();
+      for (Iterator<Long> iterator = pendingTask.requestId.iterator(); iterator.hasNext(); )
+        removeIfCompleted(pendingTask.activitiId, iterator);
+      if (pendingTask.requestId.isEmpty()) {
+        LOG.info("Notifying activity: "+ pendingTask.activitiId);
         iter.remove();                           // XXX HTC:1
-        taskListener.taskCompleted(activityId);  // XXX HTC:2
+        taskListener.taskCompleted(pendingTask.activitiId);  // XXX HTC:2
       }
     }
   }
@@ -74,7 +72,10 @@ public class PendingTasks {
     return requestEntity.getStatus().isCompletedState();
   }
 
-  public List<Long> pendingRequestIds() {
-    return pendingTasks.values().stream().flatMap(c -> c.stream()).collect(Collectors.toList());
+  public List<Long> pendingRequestIds(String processExecutionId) {
+    return pendingTasks2.stream()
+      .filter(each -> each.processExecutionId.equals(processExecutionId))
+      .map(each -> each.requestId)
+      .flatMap(c -> c.stream()).collect(Collectors.toList());
   }
 }

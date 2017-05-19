@@ -2,6 +2,7 @@ package com.example.workflow.servicetask;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
@@ -13,6 +14,6 @@ public class InstallJournalNodes extends AsyncServiceTask {
     List<Long> ids = hosts(context).journalNodeHosts.stream()
       .map(each -> api.installComponent(each, "JOURNALNODE"))
       .collect(toList());
-    pendingTasks.add(context.getId(), ids);
+    pendingTasks.add(context.getProcessInstance().getId(), context.getId(), new ArrayList<>(ids));
   }
 }

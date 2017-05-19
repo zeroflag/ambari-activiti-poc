@@ -1,5 +1,6 @@
 package com.example.workflow.servicetask;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,6 +120,6 @@ public class ReconfigureHdfs extends AsyncServiceTask {
     api.modifyConfig(coreSite);
 
     Long id = api.installComponent(hosts(context).newNameNodeHost, "HDFS_CLIENT");
-    pendingTasks.add(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getProcessInstance().getId(), context.getId(), new ArrayList<>(Arrays.asList(id)));
   }
 }

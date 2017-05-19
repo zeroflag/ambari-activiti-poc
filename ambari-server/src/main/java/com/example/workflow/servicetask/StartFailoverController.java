@@ -1,5 +1,6 @@
 package com.example.workflow.servicetask;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
@@ -11,6 +12,6 @@ public class StartFailoverController extends AsyncServiceTask {
     LOG.info("Starting failover controller activitId:" + context.getId());
     Long id1 = api.sendCommandToComponent("HDFS", "ZKFC", hosts(context).currentNameNodeHost, RoleCommand.START);
     Long id2 = api.sendCommandToComponent("HDFS", "ZKFC", hosts(context).newNameNodeHost, RoleCommand.START);
-    pendingTasks.add(context.getId(), Arrays.asList(id1, id2));
+    pendingTasks.add(context.getProcessInstance().getId(), context.getId(), new ArrayList<>(Arrays.asList(id1, id2)));
   }
 }

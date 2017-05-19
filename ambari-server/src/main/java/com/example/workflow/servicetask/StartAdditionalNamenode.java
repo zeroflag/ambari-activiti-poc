@@ -1,5 +1,6 @@
 package com.example.workflow.servicetask;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
@@ -10,6 +11,6 @@ public class StartAdditionalNamenode extends AsyncServiceTask {
   public void execute(ActivityExecution context) {
     LOG.info("Starting Additional Namenode activitId:" + context.getId());
     Long id = api.sendCommandToComponent("HDFS", "NAMENODE", hosts(context).newNameNodeHost, RoleCommand.START);
-    pendingTasks.add(context.getId(), Arrays.asList(id));
+    pendingTasks.add(context.getProcessInstance().getId(), context.getId(), new ArrayList<>(Arrays.asList(id)));
   }
 }

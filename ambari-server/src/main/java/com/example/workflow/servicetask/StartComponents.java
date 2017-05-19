@@ -1,5 +1,6 @@
 package com.example.workflow.servicetask;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
@@ -11,6 +12,6 @@ public class StartComponents extends AsyncServiceTask {
     LOG.info("Starting components activitId:" + context.getId());
     Long id1 = api.sendCommandToService("ZOOKEEPER", RoleCommand.START);
     Long id2 = api.sendCommandToComponent("HDFS", "NAMENODE", hosts(context).currentNameNodeHost, RoleCommand.START);
-    pendingTasks.add(context.getId(), Arrays.asList(id1, id2));
+    pendingTasks.add(context.getProcessInstance().getId(), context.getId(), new ArrayList<>(Arrays.asList(id1, id2)));
   }
 }

@@ -81,7 +81,7 @@ public class ActivitiResource extends BaseService {
   @GET
   @Path("/pending/{id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<Long> pendingRequests(@PathParam("id") String processExecutionId) { // TODO id
-    return pendingTasks.pendingRequestIds();
+  public List<Long> pendingRequests(@PathParam("id") String processExecutionId) {
+    return pendingTasks.pendingRequestIds(processExecutionId);
   }
 }
